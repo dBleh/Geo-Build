@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Vector3 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 
@@ -33,11 +34,14 @@ renderer.setClearColor(0x7393B3);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableKeys = true;
 
-
+var mouseInitalx = 0
+var mouseInitaly = 0
 function onMouseDown(event) {
   // calculate the mouse position in normalized device coordinates
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  mouseInitalx = mouse.x
+  mouseInitaly = mouse.y
 
   var raycaster = new THREE.Raycaster();
 
@@ -60,6 +64,7 @@ function onMouseDown(event) {
   if (selectedObject) {
     controls.enabled = false
   }
+  
 }
 function onMouseUp(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -79,11 +84,32 @@ function onMouseUp(event) {
 
     intersects[i].material = new THREE.MeshBasicMaterial({ color: 0x000000 })}
 }
-var mouseX = 0
-var mouseY = 0
+var lastPositionX = 0
+var curX = 0
+var deltaX = 0
+var lastPositionY = 0
+var curY = 0
+var deltaY = 0
+var lastPositionZ = 0
+var curZ = 0
+var deltaZ = 0
 function onMouseMove(event) {
-  mouseX = (event.clientX / window.innerWidth) * 2 - 1 ;
-  mouseY = - (event.clientY / window.innerHeight) * 2 + 1;
+  curX = event.clientX
+  deltaX = curX - lastPositionX
+  lastPositionX = curX
+  curY = event.clientY
+  deltaY = curY - lastPositionY
+  lastPositionY = curY
+  curZ = event.clientZ // There is no clientZ property in the MouseEvent object
+  deltaZ = curZ - lastPositionZ // Similarly, this line will cause an error
+  lastPositionZ = curZ // And so will this
+  console.log(Math.sin(camera.quaternion.y))
+  var delta = new THREE.Vector3((Math.cos(camera.quaternion.y)* deltaX * 0.03), -deltaY * 0.03, -(Math.sin(camera.quaternion.y) * deltaX * 0.03)); // Z component is 0, assuming you only want to move in the x-y plane
+
+  if (selectedObject) {
+    
+    selectedObject.position.add(delta); // Add delta to the current position of the object
+  }
 }
 export function addCube() {
   const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
@@ -99,10 +125,7 @@ export function addCube() {
 // Render the scene
 function animate() {
   requestAnimationFrame(animate);
-  if(selectedObject){
-    selectedObject.position.x = (selectedObject.position.x - mouseX) ;
-    selectedObject.position.y =( mouseY  * 50);
-  }
+  
 
   renderer.render(scene, camera);
 }
