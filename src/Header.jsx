@@ -3,7 +3,6 @@ import {addCube} from './Main.js' ;
 function Header() {
 
   const onClick = () =>{
-    console.log('hi')
     addCube()
   }
   return (
