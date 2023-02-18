@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DragControls } from 'three/examples/jsm/controls/DragControls'
+import {objIns} from './objectInstantiation'
+import { Vector3 } from 'three';
 
 const mouse = new THREE.Vector2();
 const scene = new THREE.Scene();
@@ -14,16 +16,11 @@ var snapRadius = new THREE.Mesh(new THREE.SphereGeometry(5,32,32), material);
 scene.add(snapRadius)
 
 var selectedObject = null
-var x = 10, y = 10, z = 10
 var cubes = []
 var grid = []
-var itemsInSnapRadius = []
 let isDragging = false;
-const cube = new THREE.Mesh(cubeGeometry, material);
-cube.position.set(-10, 10, 0)
-cubes.push(cube)
-scene.add(cube);
 var tempCubes = []
+
 const light = new THREE.PointLight(0xffffff, 1, 100);
 light.position.set(0, 0, 10);
 scene.add(light);
@@ -39,7 +36,6 @@ renderer.setClearColor(0x7393B3);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableKeys = true;
 
-const objectsToIntersect = [...cubes, ...grid];
 function onMouseDown(event) {
   // calculate the mouse position in normalized device coordinates
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -49,7 +45,7 @@ function onMouseDown(event) {
 
   // cast a ray from the camera through the mouse position
   raycaster.setFromCamera(mouse, camera);
-  const objectsToIntersect = [...cubes, ...grid];
+  const objectsToIntersect = [...cubes];
   // get the intersected objects
   var intersects = raycaster.intersectObjects(objectsToIntersect, true);
   
@@ -58,11 +54,6 @@ function onMouseDown(event) {
   for (let i = 0; i < intersects.length; i++) {
     
     const object = intersects[i].object;
-    if (selectedObject && selectedObject !== object) {
-      // reset the material of the previously selected object
-      selectedObject.material = material;
-    }
-    object.material = new THREE.MeshBasicMaterial({ color: 0xFF0000 });
     selectedObject = object;
   }}
   //adds all but the currently selected cube to intersect list
@@ -89,11 +80,7 @@ function onMouseUp(event) {
 
   selectedObject = null
   controls.enabled = true
-  if (intersects.length > 0) {
-    for (let i = 0; i < intersects.length; i++) {
-      intersects[i].material = new THREE.MeshBasicMaterial({ color: 0x000000 })
-    }
-  }
+  
 }
 
 
@@ -109,37 +96,28 @@ const dragControls = new DragControls(cubes, camera, renderer.domElement)
    //clear tempCubes to reinstantiate next intersect list
    tempCubes = []
 })
-export function addCube() {
-  const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-  const cube = new THREE.Mesh(cubeGeometry, material);
-  cube.position.set(x, y, z)
-  x++;
-  y++;
-  z++;
-
-  scene.add(cube);
-  cubes.push(cube)
+export function addObj(objType) {
+  var vThree = new Vector3(camera.position.x,camera.position.y,camera.position.z)
+  //move the object infront of the camera by a factor of 2
+  vThree.addScaledVector(camera.getWorldDirection(new THREE.Vector3()),20)
+  const obj = objIns(vThree,objType)
+  scene.add(obj);
+  cubes.push(obj)
 }
 grid.push(gridHelper)
 // Render the scene
 function animate() {
   requestAnimationFrame(animate);
   if(isDragging){
-    
     snapRadius.position.set(selectedObject.position.x,selectedObject.position.y,selectedObject.position.z)
     for(let i =0; i < tempCubes.length; i++){
         const bounds = new THREE.Box3().setFromObject(tempCubes[i]);
         const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
         if (intersects) {
-          console.log('Objects are intersecting!');
+          //console.log('Objects are intersecting!');
         } else {
-          console.log('Objects are not intersecting.');
+          //console.log('Objects are not intersecting.');
         }
-       
-      
-      
-
-     
     }
     snapRadius.visible= true
     controls.enabled = false
