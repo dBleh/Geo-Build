@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
@@ -7,9 +6,6 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 
 
 // add the PointerLockControls to the scene
-
-
-
 
 const mouse = new THREE.Vector2();
 const scene = new THREE.Scene();
@@ -23,6 +19,7 @@ var cubes = []
 var grid = []
 let isDragging = false;
 var tempCubes = []
+var floorObjs = [[],[]]
 
 const lockControls = new PointerLockControls(camera, document.body);
 scene.add(lockControls.getObject())
@@ -42,9 +39,6 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
-
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableKeys = true;
 
 function onMouseDown(event) {
   // calculate the mouse position in normalized device coordinates
@@ -72,8 +66,7 @@ function onMouseDown(event) {
 }
 
 function onMouseUp() {
-  selectedObject = null
-  controls.enabled = true
+  
 }
 
 const dragControls = new DragControls(cubes, camera, renderer.domElement)
@@ -93,8 +86,8 @@ export function addObj(objType) {
   //move the object infront of the camera by a factor of 2
   vThree.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 20)
   const obj = objIns(vThree, objType)
+  objType ==="floor" ? floorObjs.push(obj) : cubes.push(obj)
   scene.add(obj);
-  cubes.push(obj)
 }
 var wIsDown = false
 var sIsDown = false
@@ -121,10 +114,9 @@ function onKeyDown(event){
   if(event.key==="d"){
     dIsDown = true
   }
-
-
-  requestAnimationFrame(animate)
-  
+  if(event.key ==='e'){
+    selectedObject = null
+  }
 }
 function onKeyUp(event){
   if(event.key === 'w'){
@@ -141,7 +133,6 @@ function onKeyUp(event){
   }
 }
 
-
 let time = new Date()
 let lastTime = time
 // Render the scene
@@ -151,25 +142,31 @@ function animate() {
   var deltaTime = time - lastTime
   lastTime = time
   
-  
   if (isDragging) {
     snapRadius.position.set(selectedObject.position.x, selectedObject.position.y, selectedObject.position.z)
     for (let i = 0; i < tempCubes.length; i++) {
       const bounds = new THREE.Box3().setFromObject(tempCubes[i]);
       const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
       if (intersects) {
-        //console.log('Objects are intersecting!');
+        console.log('Objects are intersecting!');
       } else {
-        //console.log('Objects are not intersecting.');
+        console.log('Objects are not intersecting.');
       }
     }
+    
     snapRadius.visible = true
-    controls.enabled = false
+   
+  }
+  if(selectedObject){
+    var v = camera.getWorldPosition(new THREE.Vector3())
+    v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()),13)
+    
+    selectedObject.position.set(v.x,v.y,v.z)
+    console.log(selectedObject.position)
   }
   if (!isDragging) {
     snapRadius.visible = false
   }
-  
   if(wIsDown){
     camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), .01 * deltaTime)
   }
