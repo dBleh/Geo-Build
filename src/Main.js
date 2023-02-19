@@ -37,6 +37,7 @@ scene.add(snapRadius)
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+const canvas = renderer.domElement;
 document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
 
@@ -133,6 +134,7 @@ function onKeyUp(event){
   }
 }
 
+
 let time = new Date()
 let lastTime = time
 // Render the scene
@@ -145,7 +147,7 @@ function animate() {
   if (isDragging) {
     snapRadius.position.set(selectedObject.position.x, selectedObject.position.y, selectedObject.position.z)
     for (let i = 0; i < tempCubes.length; i++) {
-      const bounds = new THREE.Box3().setFromObject(tempCubes[i]);
+      const bounds = new THREE.Box3().setFromObject(tempCubes[i]);  
       const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
       if (intersects) {
         console.log('Objects are intersecting!');
@@ -160,9 +162,11 @@ function animate() {
   if(selectedObject){
     var v = camera.getWorldPosition(new THREE.Vector3())
     v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()),13)
+    const cameraPosition = camera.position.clone();
+    const cameraOrientation = new THREE.Quaternion();
+    camera.getWorldQuaternion(cameraOrientation);
     
-    selectedObject.position.set(v.x,v.y,v.z)
-    console.log(selectedObject.position)
+    
   }
   if (!isDragging) {
     snapRadius.visible = false
