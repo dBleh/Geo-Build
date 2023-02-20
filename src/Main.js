@@ -51,13 +51,28 @@ function onMouseDown(event) {
   const objectsToIntersect = [...cubes];
   // get the intersected objects
   var intersects = raycaster.intersectObjects(objectsToIntersect, true);
-  // loop through the intersected objects
-  if (intersects.length > 0) {
-    for (let i = 0; i < intersects.length; i++) {
-      const object = intersects[i].object;
-      selectedObject = object;
+
+  // Find the closest intersected object to the camera
+  let closestDistance = Infinity;
+  let closestObject = null;
+  for (let i = 0; i < intersects.length; i++) {
+    const distance = camera.position.distanceTo(intersects[i].object.position);
+    if (distance < closestDistance) {
+      closestDistance = distance;
+      closestObject = intersects[i].object;
     }
   }
+  if(closestObject !== null){
+    selectedObject = closestObject;
+
+  }
+  if(isIntersect){
+    selectedObject = null
+    isIntersect = false
+  }
+
+  // Set the selected object to the closest one
+
   //adds all but the currently selected cube to intersect list
   for (var i = 0; i < cubes.length; i++) {
     if (cubes[i] !== selectedObject) {
@@ -78,8 +93,7 @@ dragControls.addEventListener('dragstart', function (event) {
 dragControls.addEventListener('dragend', function (event) {
   isDragging = false;
   event.object.material.opacity = 1;
-  //clear tempCubes to reinstantiate next intersect list
-  tempCubes = []
+ 
 })
 
 export function addObj(objType) {
@@ -94,15 +108,13 @@ var wIsDown = false
 var sIsDown = false
 var aIsDown = false
 var dIsDown = false
+
 function onKeyDown(event) {
   if (event.key === 'l') {
     lockControls.lock();
     console.log("pointer locked to screen")
   }
-  if (event.key === 'u') {
-    lockControls.unlock();
-    console.log("pointer unlocked ")
-  }
+  
   if (event.key === "w") {
     wIsDown = true
   }
@@ -118,6 +130,7 @@ function onKeyDown(event) {
   if (event.key === 'e') {
     selectedObject = null
   }
+  
 }
 function onKeyUp(event) {
   if (event.key === 'w') {
@@ -132,13 +145,17 @@ function onKeyUp(event) {
   if (event.key === "d") {
     dIsDown = false
   }
+
+  
 }
 function onMouseMove(event) {
-  
-  if (selectedObject) {
-    selectedObject.lookAt(camera.position);
-    
-   
+  if (selectedObject && lockControls.isLocked) {
+    // calculate the change in mouse position
+    const deltaY = event.movementX * 0.002
+    // rotate the selected object around the x-axis by the mouse movement
+    selectedObject.rotation.y -= deltaY;
+    // restrict the rotation to the x-axis only
+    selectedObject.rotation.z = 0;
   }
 }
 
@@ -150,31 +167,51 @@ function animate() {
   time = new Date()
   var deltaTime = time - lastTime
   lastTime = time
+ 
+ 
 
   if (selectedObject) {
-    snapRadius.position.set(selectedObject.position.x, selectedObject.position.y, selectedObject.position.z)
-    for (let i = 0; i < tempCubes.length; i++) {
-      const bounds = new THREE.Box3().setFromObject(tempCubes[i]);
-      const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
-      if (intersects) {
-        isIntersect = true
-      } else {
-        isIntersect = false
+    var v = camera.getWorldPosition(new THREE.Vector3())
+    v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
+    snapRadius.position.set(v.x, v.y, v.z)
+    for (let i = 0; i < cubes.length; i++) {
+      if (cubes[i] === selectedObject) {
+        continue; // skip the selected object
       }
       
+        
+        const bounds = new THREE.Box3().setFromObject(cubes[i]);
+        const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
+        if(!intersects) {
+          isIntersect = false
+        }
+        else {
+          isIntersect = true
+          const offset = 10
+          selectedObject.position.copy(cubes[i].position)
+          selectedObject.position.y +=offset 
+          selectedObject.rotation.set(cubes[i].rotation.x,cubes[i].rotation.y,cubes[i].rotation.z) 
+          break
+        } 
+
     }
 
     snapRadius.visible = true
 
   }
-  if (selectedObject) {
-    var v = camera.getWorldPosition(new THREE.Vector3())
+  if (selectedObject && !isIntersect) {
+    
+    
+    v = camera.getWorldPosition(new THREE.Vector3())
     v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
     selectedObject.position.set(v.x, v.y, v.z)
 
   }
+  if(!selectedObject){
+    tempCubes = []
+  }
   if (!isDragging) {
-    snapRadius.visible = false
+    //snapRadius.visible = false
   }
   if (wIsDown) {
     camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), .01 * deltaTime)
@@ -188,6 +225,7 @@ function animate() {
   if (dIsDown) {
     camera.translateX(.01 * deltaTime)
   }
+
 
   renderer.render(scene, camera);
 }
