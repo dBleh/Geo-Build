@@ -19,7 +19,8 @@ var cubes = []
 var grid = []
 let isDragging = false;
 var tempCubes = []
-var floorObjs = [[],[]]
+var floorObjs = [[], []]
+var isIntersect = false
 
 const lockControls = new PointerLockControls(camera, document.body);
 scene.add(lockControls.getObject())
@@ -37,7 +38,6 @@ scene.add(snapRadius)
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-const canvas = renderer.domElement;
 document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
 
@@ -67,7 +67,7 @@ function onMouseDown(event) {
 }
 
 function onMouseUp() {
-  
+
 }
 
 const dragControls = new DragControls(cubes, camera, renderer.domElement)
@@ -87,53 +87,60 @@ export function addObj(objType) {
   //move the object infront of the camera by a factor of 2
   vThree.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 20)
   const obj = objIns(vThree, objType)
-  objType ==="floor" ? floorObjs.push(obj) : cubes.push(obj)
+  objType === "floor" ? floorObjs.push(obj) : cubes.push(obj)
   scene.add(obj);
 }
 var wIsDown = false
 var sIsDown = false
 var aIsDown = false
 var dIsDown = false
-function onKeyDown(event){
-  if(event.key ==='l'){
+function onKeyDown(event) {
+  if (event.key === 'l') {
     lockControls.lock();
     console.log("pointer locked to screen")
   }
-  if(event.key ==='u'){
+  if (event.key === 'u') {
     lockControls.unlock();
     console.log("pointer unlocked ")
   }
-  if(event.key==="w"){
+  if (event.key === "w") {
     wIsDown = true
   }
-  if(event.key==="s"){
+  if (event.key === "s") {
     sIsDown = true
   }
-  if(event.key==="a"){
+  if (event.key === "a") {
     aIsDown = true
   }
-  if(event.key==="d"){
+  if (event.key === "d") {
     dIsDown = true
   }
-  if(event.key ==='e'){
+  if (event.key === 'e') {
     selectedObject = null
   }
 }
-function onKeyUp(event){
-  if(event.key === 'w'){
+function onKeyUp(event) {
+  if (event.key === 'w') {
     wIsDown = false
   }
-  if(event.key==="s"){
+  if (event.key === "s") {
     sIsDown = false
   }
-  if(event.key==="a"){
+  if (event.key === "a") {
     aIsDown = false
   }
-  if(event.key==="d"){
+  if (event.key === "d") {
     dIsDown = false
   }
 }
-
+function onMouseMove(event) {
+  
+  if (selectedObject) {
+    selectedObject.lookAt(camera.position);
+    
+   
+  }
+}
 
 let time = new Date()
 let lastTime = time
@@ -143,47 +150,45 @@ function animate() {
   time = new Date()
   var deltaTime = time - lastTime
   lastTime = time
-  
-  if (isDragging) {
+
+  if (selectedObject) {
     snapRadius.position.set(selectedObject.position.x, selectedObject.position.y, selectedObject.position.z)
     for (let i = 0; i < tempCubes.length; i++) {
-      const bounds = new THREE.Box3().setFromObject(tempCubes[i]);  
+      const bounds = new THREE.Box3().setFromObject(tempCubes[i]);
       const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
       if (intersects) {
-        console.log('Objects are intersecting!');
+        isIntersect = true
       } else {
-        console.log('Objects are not intersecting.');
+        isIntersect = false
       }
+      
     }
-    
+
     snapRadius.visible = true
-   
+
   }
-  if(selectedObject){
+  if (selectedObject) {
     var v = camera.getWorldPosition(new THREE.Vector3())
-    v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()),13)
-    const cameraPosition = camera.position.clone();
-    const cameraOrientation = new THREE.Quaternion();
-    camera.getWorldQuaternion(cameraOrientation);
-    
-    
+    v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
+    selectedObject.position.set(v.x, v.y, v.z)
+
   }
   if (!isDragging) {
     snapRadius.visible = false
   }
-  if(wIsDown){
+  if (wIsDown) {
     camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), .01 * deltaTime)
   }
-  if(sIsDown){
+  if (sIsDown) {
     camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), -.01 * deltaTime)
   }
-  if(aIsDown){
+  if (aIsDown) {
     camera.translateX(-.01 * deltaTime)
   }
-  if(dIsDown){
+  if (dIsDown) {
     camera.translateX(.01 * deltaTime)
   }
-  
+
   renderer.render(scene, camera);
 }
 export default animate;
@@ -191,3 +196,4 @@ document.addEventListener('keydown', onKeyDown)
 document.addEventListener('keyup', onKeyUp)
 document.addEventListener('mousedown', onMouseDown);
 document.addEventListener('mouseup', onMouseUp);
+document.addEventListener('mousemove', onMouseMove)
