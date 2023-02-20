@@ -3,7 +3,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-
+import { getIntersectObj} from './inAnimation';
 
 // add the PointerLockControls to the scene
 
@@ -182,24 +182,19 @@ function animate() {
       }
       objToSnap = objs[i]
 
-      const bounds = new THREE.Box3().setFromObject(objs[i].obj);
-      const intersects = bounds.intersectsBox(new THREE.Box3().setFromObject(snapRadius));
-      if (!intersects) {
+      const intersectedObj = getIntersectObj(objs[i],snapRadius)
+      if(!intersectedObj){
         isIntersect = false
       }
-      else {
-        if (objs[i].objType === 'wall') {
-          if (objs[i].slotOne === 'unoccupied') {
-            isIntersect = true
-            const offset = 10
-            selectedObject.position.copy(objs[i].obj.position)
-            selectedObject.position.y += offset
-            selectedObject.rotation.set(objs[i].obj.rotation.x, objs[i].obj.rotation.y, objs[i].obj.rotation.z)
-          }
-        }
+      else{
+        const offset = 10
+        isIntersect = true
+        selectedObject.rotation.set(intersectedObj.obj.rotation.x, intersectedObj.obj.rotation.y, intersectedObj.obj.rotation.z)
+        selectedObject.position.copy(intersectedObj.obj.position)
+        selectedObject.position.y += offset
         break
-      }
 
+      }
     }
 
     snapRadius.visible = true
