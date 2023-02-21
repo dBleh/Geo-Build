@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import animate from './Main.js';
-import Header from './Header';
+import animate from './frontend/Main.js';
+import Header from './frontend/Header';
 
 function App() {
   const mountRef = useRef(null);

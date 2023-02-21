@@ -3,7 +3,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { getIntersectObj} from './inAnimation';
+import { getIntersectObj } from './inAnimation';
 
 // add the PointerLockControls to the scene
 
@@ -19,7 +19,7 @@ var cubes = []
 var grid = []
 let isDragging = false;
 
-
+var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
@@ -45,16 +45,61 @@ renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
 
-  if (isIntersect) {
-    objToSnap.slotOne = 'occupied'
+  if (isIntersect && objToSnap.position) {
+    if (selectedObject.objType === "wall") {
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const obj = new THREE.Mesh(objGeometry, mat);
+      obj.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 4.5, selectedObject.obj.position.z)
+      const top = {
+        obj: obj,
+        objType: "wall",
+      }
+      scene.add(obj)
+      snapObjs.push(top)
+    }
+    else {
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const objRight = new THREE.Mesh(objGeometry, mat);
+      objRight.position.set(selectedObject.obj.position.x + 4.5, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
+      const right = {
+        obj: objRight,
+        objType: "floor",
+      }
+      const objFront = new THREE.Mesh(objGeometry, mat);
+      objFront.position.set(selectedObject.obj.position.x - 4.5, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
+      const front = {
+        obj: objFront,
+        objType: "floor",
+      }
+      const objLeft = new THREE.Mesh(objGeometry, mat);
+      objLeft.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z + 4.5)
+      const left = {
+        obj: objLeft,
+        objType: "floor",
+      }
+      const objBack = new THREE.Mesh(objGeometry, mat);
+      objBack.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z - 4.5)
+      const back = {
+        obj: objBack,
+        objType: "floor",
+      }
+      scene.add(objRight)
+      scene.add(objFront)
+      scene.add(objLeft)
+      scene.add(objBack)
 
+      snapObjs.push(right)
+      snapObjs.push(left)
+      snapObjs.push(front)
+      snapObjs.push(back)
+    }
     selectedObject = null
     isIntersect = false
   }
 }
-
 function onMouseUp() {
-
 }
 
 const dragControls = new DragControls(cubes, camera, renderer.domElement)
@@ -77,23 +122,38 @@ export function addObj(objType) {
     const t = {
       obj: obj,
       objType: objType,
-      slotOne: 'unoccupied',
-      slotTwo: 'unoccupied',
-      slotThree: 'unoccupied',
-      slotFour: 'unoccupied',
     }
+
     objs.push(t)
   }
   else {
     const t = {
       obj: obj,
       objType: objType,
-      slotOne: 'unoccupied',
+    }
+    if (snapObjs.length === 0) {
+      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+      const objBack = new THREE.Mesh(objGeometry, mat);
+      objBack.position.set(obj.position.x, obj.position.y + 10, obj.position.z)
+      const back = {
+        obj: objBack,
+        objType: "floor",
+      }
+      scene.add(back.obj)
+      snapObjs.push(back)
     }
     objs.push(t)
   }
-  selectedObject = obj
+  if(selectedObject){
+    scene.remove(selectedObject.obj)
+  }
+  selectedObject = {
+    obj: obj,
+    objType: objType,
+  }
   scene.add(obj);
+
 }
 var wIsDown = false
 var sIsDown = false
@@ -103,8 +163,6 @@ var spaceIsDown = false
 var lControl = false
 function onKeyDown(event) {
   event.preventDefault();
-
-  
   if (event.key === 'l') {
     lockControls.lock();
     console.log("pointer locked to screen")
@@ -159,8 +217,8 @@ function onKeyUp(event) {
 function onMouseMove(event) {
   if (selectedObject && lockControls.isLocked) {
     const deltaY = event.movementX * 0.002
-    selectedObject.rotation.y -= deltaY;
-    selectedObject.rotation.z = 0;
+    selectedObject.obj.rotation.y -= deltaY;
+    selectedObject.obj.rotation.z = 0;
   }
 }
 
@@ -172,41 +230,45 @@ function animate() {
   time = new Date()
   var deltaTime = time - lastTime
   lastTime = time
+
   if (selectedObject) {
     var v = camera.getWorldPosition(new THREE.Vector3())
     v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
     snapRadius.position.set(v.x, v.y, v.z)
-    for (let i = 0; i < objs.length; i++) {
-      if (objs[i].obj === selectedObject) {
-        continue; // skip the selected object
-      }
-      objToSnap = objs[i]
+    if (snapObjs.length === 0) {
+      isIntersect = false
+      v = camera.getWorldPosition(new THREE.Vector3())
+      v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
+      selectedObject.obj.position.set(v.x, v.y, v.z)
+    }
+    else {
+      for (let i = 0; i < snapObjs.length; i++) {
+        objToSnap = snapObjs[i].obj
+        const intersectedObj = getIntersectObj(snapObjs[i], snapRadius)
 
-      const intersectedObj = getIntersectObj(objs[i],snapRadius)
-      if(!intersectedObj){
-        isIntersect = false
-      }
-      else{
-        const offset = 10
-        isIntersect = true
-        selectedObject.rotation.set(intersectedObj.obj.rotation.x, intersectedObj.obj.rotation.y, intersectedObj.obj.rotation.z)
-        selectedObject.position.copy(intersectedObj.obj.position)
-        selectedObject.position.y += offset
-        break
+        if (!intersectedObj) {
+          isIntersect = false
+          v = camera.getWorldPosition(new THREE.Vector3())
+          v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
+          selectedObject.obj.position.set(v.x, v.y, v.z)
 
+        }
+        else {
+          const offset = selectedObject.obj.geometry.parameters.height / 2
+          isIntersect = true
+          selectedObject.obj.rotation.set(intersectedObj.obj.rotation.x, intersectedObj.obj.rotation.y, intersectedObj.obj.rotation.z)
+          selectedObject.obj.position.copy(intersectedObj.obj.position)
+          selectedObject.obj.position.y += offset
+          
+          break
+
+        }
       }
     }
-
     snapRadius.visible = true
-
-  }
-  if (selectedObject && !isIntersect) {
-    v = camera.getWorldPosition(new THREE.Vector3())
-    v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-    selectedObject.position.set(v.x, v.y, v.z)
   }
   if (!isDragging) {
-    //snapRadius.visible = false
+    snapRadius.visible = false
   }
   if (wIsDown) {
     camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), .01 * deltaTime)
@@ -229,6 +291,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 export default animate;
+
 document.addEventListener('keydown', onKeyDown)
 document.addEventListener('keyup', onKeyUp)
 document.addEventListener('mousedown', onMouseDown);
