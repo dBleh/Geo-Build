@@ -3,7 +3,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { getIntersectObj } from './inAnimation';
+import { getIntersectObj,setPosition,setRotation } from './inAnimation';
 
 // add the PointerLockControls to the scene
 
@@ -44,59 +44,67 @@ document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
+  if (selectedObject) {
+    if (selectedObject.objType === "wall" && objToSnap) {
 
-  if (isIntersect && objToSnap.position) {
-    if (selectedObject.objType === "wall") {
       const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const objGeometry = new THREE.BoxGeometry(1, 1, 1);
       const obj = new THREE.Mesh(objGeometry, mat);
-      obj.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 4.5, selectedObject.obj.position.z)
+      obj.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 5, selectedObject.obj.position.z)
+      scene.add(obj)
+      obj.rotation.y = selectedObject.obj.rotation.y
       const top = {
         obj: obj,
         objType: "wall",
       }
-      scene.add(obj)
+
       snapObjs.push(top)
+      selectedObject = null
+      isIntersect = false
+      objToSnap = null
     }
-    else {
+    if (selectedObject.objType === "floor") {
       const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const objGeometry = new THREE.BoxGeometry(1, 1, 1);
       const objRight = new THREE.Mesh(objGeometry, mat);
-      objRight.position.set(selectedObject.obj.position.x + 4.5, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
+      objRight.position.set(selectedObject.obj.position.x + 5 - .1, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
+      scene.add(objRight)
+      objRight.rotation.y = Math.PI / 2
       const right = {
         obj: objRight,
-        objType: "floor",
-      }
-      const objFront = new THREE.Mesh(objGeometry, mat);
-      objFront.position.set(selectedObject.obj.position.x - 4.5, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
-      const front = {
-        obj: objFront,
-        objType: "floor",
+        objType: "floorRight",
       }
       const objLeft = new THREE.Mesh(objGeometry, mat);
-      objLeft.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z + 4.5)
+      objLeft.position.set(selectedObject.obj.position.x - 5 + .1, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
+      scene.add(objLeft)
+      objLeft.rotation.y = -Math.PI / 2
       const left = {
         obj: objLeft,
-        objType: "floor",
+        objType: "floorLeft",
       }
       const objBack = new THREE.Mesh(objGeometry, mat);
-      objBack.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z - 4.5)
+      objBack.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z + 5 - .1)
+      scene.add(objBack)
       const back = {
         obj: objBack,
-        objType: "floor",
+        objType: "floorBack",
       }
-      scene.add(objRight)
+      const objFront = new THREE.Mesh(objGeometry, mat);
+      objFront.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z - 5 - .1)
       scene.add(objFront)
-      scene.add(objLeft)
-      scene.add(objBack)
+      const front = {
+        obj: objFront,
+        objType: "floorFront",
+      }
 
       snapObjs.push(right)
       snapObjs.push(left)
       snapObjs.push(front)
       snapObjs.push(back)
+      selectedObject = null
+      isIntersect = false
+      objToSnap = null
     }
-    selectedObject = null
-    isIntersect = false
   }
 }
 function onMouseUp() {
@@ -118,34 +126,12 @@ export function addObj(objType) {
   //move the object infront of the camera by a factor of 2
   vThree.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 20)
   const obj = objIns(vThree, objType)
-  if (objType === "floor") {
     const t = {
       obj: obj,
       objType: objType,
     }
-
     objs.push(t)
-  }
-  else {
-    const t = {
-      obj: obj,
-      objType: objType,
-    }
-    if (snapObjs.length === 0) {
-      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
-      const objBack = new THREE.Mesh(objGeometry, mat);
-      objBack.position.set(obj.position.x, obj.position.y + 10, obj.position.z)
-      const back = {
-        obj: objBack,
-        objType: "floor",
-      }
-      scene.add(back.obj)
-      snapObjs.push(back)
-    }
-    objs.push(t)
-  }
-  if(selectedObject){
+  if (selectedObject) {
     scene.remove(selectedObject.obj)
   }
   selectedObject = {
@@ -243,10 +229,11 @@ function animate() {
     }
     else {
       for (let i = 0; i < snapObjs.length; i++) {
-        objToSnap = snapObjs[i].obj
+        objToSnap = snapObjs[i]
         const intersectedObj = getIntersectObj(snapObjs[i], snapRadius)
 
         if (!intersectedObj) {
+          objToSnap = null
           isIntersect = false
           v = camera.getWorldPosition(new THREE.Vector3())
           v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
@@ -254,15 +241,19 @@ function animate() {
 
         }
         else {
-          const offset = selectedObject.obj.geometry.parameters.height / 2
-          isIntersect = true
-          selectedObject.obj.rotation.set(intersectedObj.obj.rotation.x, intersectedObj.obj.rotation.y, intersectedObj.obj.rotation.z)
-          selectedObject.obj.position.copy(intersectedObj.obj.position)
-          selectedObject.obj.position.y += offset
-          
-          break
+          if (selectedObject.objType === "floor" && objToSnap.objType === "wall") {
+          }
+          else {
 
+            isIntersect = true
+            selectedObject.obj.rotation.copy(setRotation(intersectedObj, selectedObject))
+            selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject))
+
+          }
+          break
         }
+
+
       }
     }
     snapRadius.visible = true
