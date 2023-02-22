@@ -3,7 +3,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { getIntersectObj, setPosition, setRotation } from './inAnimation';
+import { getIntersectObj, setPosition } from './inAnimation';
 
 // add the PointerLockControls to the scene
 
@@ -48,6 +48,7 @@ renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
   if (selectedObject) {
+    console.log(selectedObject.obj.rotation)
     addSnaps(selectedObject)
 
     selectedObject = null
@@ -73,96 +74,134 @@ dragControls.addEventListener('dragend', function (event) {
 })
 function addSnaps(selectedObject) {
   const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+  const matT = new THREE.MeshBasicMaterial({ color: 0xf00fff });
   const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-
   if (selectedObject.objType === 'floor') {
     // Add snap points to floor object
-    const snapPositions = [
-      new THREE.Vector3(5 - 0.1, 2, 0),
-      new THREE.Vector3(-5 + 0.1, 2, 0),
-      new THREE.Vector3(0, 2, 5 - 0.1),
-      new THREE.Vector3(0, 2, -5 - 0.1),
-    ];
+    const snapPositions = {
+      right: new THREE.Vector3(5, 2, 0),
+      back: new THREE.Vector3(0, 2, 5),
+      front: new THREE.Vector3(0, 2, - 5),
+      left: new THREE.Vector3(-5, 2, 0),
+    };
 
-    for (const pos of snapPositions) {
-      // Rotate snap position based on object orientation
-      pos.applyQuaternion(selectedObject.obj.quaternion);
+    const q = new THREE.Quaternion();
+    q.copy(selectedObject.obj.quaternion);
 
-      const snapObj = new THREE.Mesh(objGeometry, mat);
-      snapObj.position.copy(selectedObject.obj.position).add(pos);
-      snapObj.rotation.y = selectedObject.obj.rotation.y
-      scene.add(snapObj);
+    snapPositions.right.applyQuaternion(q);
+    snapPositions.left.applyQuaternion(q);
+    snapPositions.front.applyQuaternion(q);
+    snapPositions.back.applyQuaternion(q);
 
+    const mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
 
-      snapObjs.push({
-        obj: snapObj,
-        objType: 'floor',
-      });
-    }
+    const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+    const snapObjLeft = new THREE.Mesh(objGeometry, mat);
+    snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
+    snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjLeft.rotateY(Math.PI / 2)
+    scene.add(snapObjLeft);
+    snapObjLeft.visible = false
+    snapObjs.push({
+      obj: snapObjLeft,
+      objType: 'floorLeft',
+    });
+    const snapObjRight = new THREE.Mesh(objGeometry, mat);
+    snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
+    snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjRight.rotateY(-Math.PI / 2)
+    scene.add(snapObjRight);
+    snapObjRight.visible = false
+    snapObjs.push({
+      obj: snapObjRight,
+      objType: 'floorRight',
+    });
+    const snapObjBack = new THREE.Mesh(objGeometry, matT);
+    snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
+    snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjBack.rotateY(Math.PI)
+    scene.add(snapObjBack);
+    snapObjBack.visible = false
+    snapObjs.push({
+      obj: snapObjBack,
+      objType: 'floorBack',
+    });
+    const snapObjFront = new THREE.Mesh(objGeometry, matT);
+    snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
+    snapObjFront.quaternion.copy(selectedObject.obj.quaternion);
+    scene.add(snapObjFront);
+    snapObjFront.visible = false
+    snapObjs.push({
+      obj: snapObjFront,
+      objType: 'floorFront',
+    });
   }
-
   if (selectedObject.objType === 'wall') {
     // Add snap point to wall object
     const snapPos = new THREE.Vector3(0, 5, 0);
     snapPos.applyQuaternion(selectedObject.obj.quaternion);
-
     const snapObj = new THREE.Mesh(objGeometry, mat);
     snapObj.position.copy(selectedObject.obj.position).add(snapPos);
     snapObj.rotation.y = selectedObject.obj.rotation.y;
     scene.add(snapObj);
-
-
+    snapObj.visible = false
     snapObjs.push({
       obj: snapObj,
       objType: 'wall',
     });
   }
-
   if (selectedObject.objType === 'floorT') {
     // Add snap points to floorT object
-
     const snapPositions = {
-      back: new THREE.Vector3(0, 4.5, -.2),
+      back: new THREE.Vector3(0, 4.5, 0),
       right: new THREE.Vector3(-4.33013, 4.5, -2.5),
       left: new THREE.Vector3(-4.33013, 4.5, 2.5),
     };
-
     // Rotate snap positions based on object orientation
     snapPositions.right.applyQuaternion(selectedObject.obj.quaternion);
     snapPositions.left.applyQuaternion(selectedObject.obj.quaternion);
-
-    const snapObjLeft = new THREE.Mesh(objGeometry, mat);
+    snapPositions.back.applyQuaternion(selectedObject.obj.quaternion);
+    // Define the dimensions of the squares
+    // Define the geometry for the squares
+    const squareGeometry = new THREE.BoxGeometry(1, 1, 1);
+    // Create the square meshes and add them to the scene
+    const snapObjLeft = new THREE.Mesh(squareGeometry, mat);
     snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
-    snapObjLeft.rotateY(1.0472);
+    snapObjLeft.rotateY(1.0472 + Math.PI / 2);
     scene.add(snapObjLeft);
+    snapObjLeft.visible = false
     snapObjs.push({
       obj: snapObjLeft,
       objType: 'floorLeftT',
     });
-
     const snapObjRight = new THREE.Mesh(objGeometry, mat);
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
     snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
-    snapObjRight.rotateY(-1.0472);
+    snapObjRight.rotateY(-1.0472 + Math.PI / 2);
+    // Get the inverse of the snap object's world matrix
+    const snapWorldInverse = new THREE.Matrix4();
+    snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
+    // Transform the position of the new object by the inverse of the snap object's world matrix
     scene.add(snapObjRight);
+    snapObjRight.visible = false
     snapObjs.push({
       obj: snapObjRight,
       objType: 'floorRightT',
     });
-
-    const snapObjBack = new THREE.Mesh(objGeometry, mat);
+    const snapObjBack = new THREE.Mesh(squareGeometry, mat);
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
+    snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjBack.rotateY(-Math.PI / 2)
     scene.add(snapObjBack);
+    snapObjBack.visible = false
     snapObjs.push({
       obj: snapObjBack,
       objType: 'floorBackT',
     });
   }
-
-
 }
-
 //move this
 export function addObj(objType) {
   var vThree = new Vector3(camera.position.x, camera.position.y, camera.position.z)
@@ -182,8 +221,6 @@ export function addObj(objType) {
     objType: objType,
   }
   scene.add(obj);
-
-
 }
 var wIsDown = false
 var sIsDown = false
@@ -213,7 +250,7 @@ function onKeyDown(event) {
   if (event.key === " ") {
     spaceIsDown = true
   }
-  if (event.key === "Shift") {
+  if (event.key === "x") {
     lControl = true
   }
   if (event.key === 'e') {
@@ -238,7 +275,7 @@ function onKeyUp(event) {
   if (event.key === " ") {
     spaceIsDown = false
   }
-  if (event.key === "Shift") {
+  if (event.key === "x") {
     lControl = false
   }
 
@@ -282,22 +319,16 @@ function animate() {
           v = camera.getWorldPosition(new THREE.Vector3())
           v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
           selectedObject.obj.position.set(v.x, v.y - 10, v.z)
-
         }
         else {
           if (selectedObject.objType === "floor" && objToSnap.objType === "wall") {
           }
           else {
-
             isIntersect = true
-            selectedObject.obj.position.copy(setRotation(intersectedObj, selectedObject))
             selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject))
-
           }
           break
         }
-
-
       }
     }
     snapRadius.visible = true
