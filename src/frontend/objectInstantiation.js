@@ -12,12 +12,12 @@ export function objIns(vThree, objType) {
       
       0, 0, -5,
       0, 0, 5,
-      -8.66, 0, -0,
+      -8.66025, 0, -0,
       // Define the vertices of the top triangle
       
       0, 5, -5,
       0, 5, 5,
-      -8.66, 5, -0,
+      -8.66025, 5, -0,
     ]);
     const indices = new Uint16Array([
       0, 1, 2,  // bottom triangle
@@ -49,7 +49,7 @@ export function objIns(vThree, objType) {
   else{
 
   const objGeometry = objType === "floor" ? new THREE.BoxGeometry(10, 5, 10) : new THREE.BoxGeometry(10, 10, .2);
-  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0x00ff00 }) : new THREE.MeshBasicMaterial({ color: 0x0000 });
+  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0x00ff00 }) : new THREE.MeshBasicMaterial({ color: 0x0ff0 });
 
   const obj = new THREE.Mesh(objGeometry, material);
   obj.position.set(vThree.x, vThree.y, vThree.z);

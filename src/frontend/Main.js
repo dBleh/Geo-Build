@@ -11,6 +11,7 @@ import { getIntersectObj, setPosition, setRotation } from './inAnimation';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 camera.position.set(-4, 10, 20); // set camera position
+camera.rotateX(-.3)
 
 const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
@@ -48,12 +49,12 @@ renderer.setClearColor(0x7393B3);
 function onMouseDown(event) {
   if (selectedObject) {
     addSnaps(selectedObject)
-    
-      selectedObject = null
-      isIntersect = false
-      objToSnap = null
-  
-    
+
+    selectedObject = null
+    isIntersect = false
+    objToSnap = null
+
+
   }
 }
 function onMouseUp() {
@@ -91,7 +92,7 @@ function addSnaps(selectedObject) {
       snapObj.position.copy(selectedObject.obj.position).add(pos);
       snapObj.rotation.y = selectedObject.obj.rotation.y
       scene.add(snapObj);
-    
+
 
       snapObjs.push({
         obj: snapObj,
@@ -109,7 +110,7 @@ function addSnaps(selectedObject) {
     snapObj.position.copy(selectedObject.obj.position).add(snapPos);
     snapObj.rotation.y = selectedObject.obj.rotation.y;
     scene.add(snapObj);
-   
+
 
     snapObjs.push({
       obj: snapObj,
@@ -119,27 +120,47 @@ function addSnaps(selectedObject) {
 
   if (selectedObject.objType === 'floorT') {
     // Add snap points to floorT object
-    const snapPositions = [
-      new THREE.Vector3(2.2 - 0.1, 4.5, -4.5),
-      new THREE.Vector3(-2.2 + 0.1, 4.5, -4.5),
-    ];
 
-    for (const pos of snapPositions) {
-      // Rotate snap position based on object orientation
-      pos.applyQuaternion(selectedObject.obj.quaternion);
+    const snapPositions = {
+      back: new THREE.Vector3(0, 4.5, -.2),
+      right: new THREE.Vector3(-4.33013, 4.5, -2.5),
+      left: new THREE.Vector3(-4.33013, 4.5, 2.5),
+    };
 
-      const snapObj = new THREE.Mesh(objGeometry, mat);
-      snapObj.position.copy(selectedObject.obj.position).add(pos);
-      snapObj.rotation.y = (Math.PI / 3);
-      scene.add(snapObj);
-      
+    // Rotate snap positions based on object orientation
+    snapPositions.right.applyQuaternion(selectedObject.obj.quaternion);
+    snapPositions.left.applyQuaternion(selectedObject.obj.quaternion);
 
-      snapObjs.push({
-        obj: snapObj,
-        objType: 'floorT',
-      });
-    }
+    const snapObjLeft = new THREE.Mesh(objGeometry, mat);
+    snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
+    snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjLeft.rotateY(1.0472);
+    scene.add(snapObjLeft);
+    snapObjs.push({
+      obj: snapObjLeft,
+      objType: 'floorLeftT',
+    });
+
+    const snapObjRight = new THREE.Mesh(objGeometry, mat);
+    snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
+    snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjRight.rotateY(-1.0472);
+    scene.add(snapObjRight);
+    snapObjs.push({
+      obj: snapObjRight,
+      objType: 'floorRightT',
+    });
+
+    const snapObjBack = new THREE.Mesh(objGeometry, mat);
+    snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
+    scene.add(snapObjBack);
+    snapObjs.push({
+      obj: snapObjBack,
+      objType: 'floorBackT',
+    });
   }
+
+
 }
 
 //move this
@@ -243,12 +264,12 @@ function animate() {
   if (selectedObject) {
     var v = camera.getWorldPosition(new THREE.Vector3())
     v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-    snapRadius.position.set(v.x, v.y, v.z)
+    snapRadius.position.set(v.x, v.y - 10, v.z)
     if (snapObjs.length === 0) {
       isIntersect = false
       v = camera.getWorldPosition(new THREE.Vector3())
       v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-      selectedObject.obj.position.set(v.x, v.y, v.z)
+      selectedObject.obj.position.set(v.x, v.y - 10, v.z)
     }
     else {
       for (let i = 0; i < snapObjs.length; i++) {
@@ -260,7 +281,7 @@ function animate() {
           isIntersect = false
           v = camera.getWorldPosition(new THREE.Vector3())
           v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-          selectedObject.obj.position.set(v.x, v.y, v.z)
+          selectedObject.obj.position.set(v.x, v.y - 10, v.z)
 
         }
         else {
@@ -269,7 +290,7 @@ function animate() {
           else {
 
             isIntersect = true
-            selectedObject.obj.rotation.copy(setRotation(intersectedObj, selectedObject))
+            selectedObject.obj.position.copy(setRotation(intersectedObj, selectedObject))
             selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject))
 
           }
