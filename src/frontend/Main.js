@@ -3,7 +3,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { getIntersectObj,setPosition,setRotation } from './inAnimation';
+import { getIntersectObj, setPosition, setRotation } from './inAnimation';
 
 // add the PointerLockControls to the scene
 
@@ -23,6 +23,8 @@ var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
+
+
 
 const lockControls = new PointerLockControls(camera, document.body);
 scene.add(lockControls.getObject())
@@ -45,70 +47,18 @@ renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
   if (selectedObject) {
-    if (selectedObject.objType === "wall" && objToSnap) {
-
-      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
-      const obj = new THREE.Mesh(objGeometry, mat);
-      obj.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 5, selectedObject.obj.position.z)
-      scene.add(obj)
-      obj.rotation.y = selectedObject.obj.rotation.y
-      const top = {
-        obj: obj,
-        objType: "wall",
-      }
-
-      snapObjs.push(top)
+    addSnaps(selectedObject)
+    
       selectedObject = null
       isIntersect = false
       objToSnap = null
-    }
-    if (selectedObject.objType === "floor") {
-      const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
-      const objRight = new THREE.Mesh(objGeometry, mat);
-      objRight.position.set(selectedObject.obj.position.x + 5 - .1, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
-      scene.add(objRight)
-      objRight.rotation.y = Math.PI / 2
-      const right = {
-        obj: objRight,
-        objType: "floorRight",
-      }
-      const objLeft = new THREE.Mesh(objGeometry, mat);
-      objLeft.position.set(selectedObject.obj.position.x - 5 + .1, selectedObject.obj.position.y + 2, selectedObject.obj.position.z)
-      scene.add(objLeft)
-      objLeft.rotation.y = -Math.PI / 2
-      const left = {
-        obj: objLeft,
-        objType: "floorLeft",
-      }
-      const objBack = new THREE.Mesh(objGeometry, mat);
-      objBack.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z + 5 - .1)
-      scene.add(objBack)
-      const back = {
-        obj: objBack,
-        objType: "floorBack",
-      }
-      const objFront = new THREE.Mesh(objGeometry, mat);
-      objFront.position.set(selectedObject.obj.position.x, selectedObject.obj.position.y + 2, selectedObject.obj.position.z - 5 - .1)
-      scene.add(objFront)
-      const front = {
-        obj: objFront,
-        objType: "floorFront",
-      }
-
-      snapObjs.push(right)
-      snapObjs.push(left)
-      snapObjs.push(front)
-      snapObjs.push(back)
-      selectedObject = null
-      isIntersect = false
-      objToSnap = null
-    }
+  
+    
   }
 }
 function onMouseUp() {
 }
+
 
 const dragControls = new DragControls(cubes, camera, renderer.domElement)
 dragControls.addEventListener('dragstart', function (event) {
@@ -120,17 +70,89 @@ dragControls.addEventListener('dragend', function (event) {
   event.object.material.opacity = 1;
 
 })
+function addSnaps(selectedObject) {
+  const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+  if (selectedObject.objType === 'floor') {
+    // Add snap points to floor object
+    const snapPositions = [
+      new THREE.Vector3(5 - 0.1, 2, 0),
+      new THREE.Vector3(-5 + 0.1, 2, 0),
+      new THREE.Vector3(0, 2, 5 - 0.1),
+      new THREE.Vector3(0, 2, -5 - 0.1),
+    ];
+
+    for (const pos of snapPositions) {
+      // Rotate snap position based on object orientation
+      pos.applyQuaternion(selectedObject.obj.quaternion);
+
+      const snapObj = new THREE.Mesh(objGeometry, mat);
+      snapObj.position.copy(selectedObject.obj.position).add(pos);
+      snapObj.rotation.y = selectedObject.obj.rotation.y
+      scene.add(snapObj);
+    
+
+      snapObjs.push({
+        obj: snapObj,
+        objType: 'floor',
+      });
+    }
+  }
+
+  if (selectedObject.objType === 'wall') {
+    // Add snap point to wall object
+    const snapPos = new THREE.Vector3(0, 5, 0);
+    snapPos.applyQuaternion(selectedObject.obj.quaternion);
+
+    const snapObj = new THREE.Mesh(objGeometry, mat);
+    snapObj.position.copy(selectedObject.obj.position).add(snapPos);
+    snapObj.rotation.y = selectedObject.obj.rotation.y;
+    scene.add(snapObj);
+   
+
+    snapObjs.push({
+      obj: snapObj,
+      objType: 'wall',
+    });
+  }
+
+  if (selectedObject.objType === 'floorT') {
+    // Add snap points to floorT object
+    const snapPositions = [
+      new THREE.Vector3(2.2 - 0.1, 4.5, -4.5),
+      new THREE.Vector3(-2.2 + 0.1, 4.5, -4.5),
+    ];
+
+    for (const pos of snapPositions) {
+      // Rotate snap position based on object orientation
+      pos.applyQuaternion(selectedObject.obj.quaternion);
+
+      const snapObj = new THREE.Mesh(objGeometry, mat);
+      snapObj.position.copy(selectedObject.obj.position).add(pos);
+      snapObj.rotation.y = (Math.PI / 3);
+      scene.add(snapObj);
+      
+
+      snapObjs.push({
+        obj: snapObj,
+        objType: 'floorT',
+      });
+    }
+  }
+}
+
 //move this
 export function addObj(objType) {
   var vThree = new Vector3(camera.position.x, camera.position.y, camera.position.z)
   //move the object infront of the camera by a factor of 2
   vThree.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 20)
   const obj = objIns(vThree, objType)
-    const t = {
-      obj: obj,
-      objType: objType,
-    }
-    objs.push(t)
+  const t = {
+    obj: obj,
+    objType: objType,
+  }
+  objs.push(t)
   if (selectedObject) {
     scene.remove(selectedObject.obj)
   }
@@ -139,6 +161,7 @@ export function addObj(objType) {
     objType: objType,
   }
   scene.add(obj);
+
 
 }
 var wIsDown = false

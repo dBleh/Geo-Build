@@ -11,6 +11,7 @@ function Header() {
         <li>Rust Base Builder</li>
         <li onClick={() => onClick("floor")}>Add Floor</li>
         <li onClick={() => onClick("wall")}>Add Wall</li>
+        <li onClick={() => onClick("floorT")}>Add Triangle Floor</li>
       </ul>
       
     </header>
