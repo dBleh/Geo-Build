@@ -24,7 +24,7 @@ var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
-
+var isOpen = FontFaceSetLoadEvent
 
 
 const lockControls = new PointerLockControls(camera, document.body);
@@ -47,6 +47,7 @@ document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
+  
   if (selectedObject) {
     console.log(selectedObject.obj.rotation)
     addSnaps(selectedObject)
@@ -228,10 +229,15 @@ var aIsDown = false
 var dIsDown = false
 var spaceIsDown = false
 var lControl = false
+
+
+
+// Add the box to the document
+
 function onKeyDown(event) {
   event.preventDefault();
-  if (event.key === 'l') {
-    lockControls.lock();
+  if (event.key === 'e') {
+    lockControls.unlock();
     console.log("pointer locked to screen")
   }
 
@@ -253,13 +259,15 @@ function onKeyDown(event) {
   if (event.key === "x") {
     lControl = true
   }
-  if (event.key === 'e') {
-    selectedObject = null
-  }
+ 
 
 }
 function onKeyUp(event) {
   event.preventDefault();
+  if (event.key === 'e') {
+    lockControls.lock();
+    console.log("pointer locked to screen")
+  }
   if (event.key === 'w') {
     wIsDown = false
   }
@@ -354,10 +362,11 @@ function animate() {
   if (lControl) {
     camera.translateY(-.01 * deltaTime)
   }
+
   renderer.render(scene, camera);
+  
 }
 export default animate;
-
 document.addEventListener('keydown', onKeyDown)
 document.addEventListener('keyup', onKeyUp)
 document.addEventListener('mousedown', onMouseDown);

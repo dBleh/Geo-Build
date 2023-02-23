@@ -17,6 +17,20 @@ canvas {
   left: 0;
   z-index: 0;
 }
+section{
+  position:fixed;
+  text-align: center;
+  top: 35vh;
+  left: 42.5vw;
+  width: 30vh;
+  height:30vh;
+  background-color: #b82a2a;
+  z-index: 1;
+  color:rgb(45, 45, 45);
+  font-family: sans-serif;
+  border-radius: 200px;
+}
+
 header {
   position:fixed;
   text-align: center;
@@ -36,4 +50,41 @@ header ul {
 }
 header li{
   margin-left:10px;
+}
+.popup-box {
+  position: relative;
+  width: 500px;
+  top: -900px;
+  left: 0;
+ 
+  pointer-events: all;
+    
+
+  z-index: 2;
+}
+
+.arrow-right {
+  position: absolute;
+  top: 36%;
+  left:0;
+  transform: translate(-50%, -50%) rotate(0deg);
+  width: 0;
+  height: 0;
+  border-top: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+  border-left: 300px solid green;
+  outline: 2px solid red;
+}
+
+.arrow-left {
+  position: absolute;
+  top: 36%;
+  left:60%;
+  transform: translate(-50%, -50%) rotate(180deg);
+  width: 0;
+  height: 0;
+  border-top: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+  border-left: 300px solid green;
+  outline: 2px solid red;
 }
