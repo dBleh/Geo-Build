@@ -9,12 +9,12 @@ export function objIns(vThree, objType) {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array([
       // Define the vertices of the base triangle
-      
+
       0, 0, -5,
       0, 0, 5,
       -8.66025, 0, -0,
       // Define the vertices of the top triangle
-      
+
       0, 5, -5,
       0, 5, 5,
       -8.66025, 5, -0,
@@ -41,16 +41,38 @@ export function objIns(vThree, objType) {
     mesh.position.set(vThree.x, vThree.y, vThree.z);
     const wireframeMesh = new THREE.Mesh(geometry, wireframeMaterial);
     mesh.add(wireframeMesh)
-    mesh.rotateY(( 3 * Math.PI / 2))
+    mesh.rotateY((3 * Math.PI / 2))
     return mesh
   }
-  else{
-  const objGeometry = objType === "floor" ? new THREE.BoxGeometry(10, 5, 10) : new THREE.BoxGeometry(10, 10, .2);
-  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0xEEA47F }) : new THREE.MeshBasicMaterial({  color:  0x0539CFF } );
-  const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
-  const obj = new THREE.Mesh(objGeometry, material);
-  const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
-  obj.add(wireframeMesh)
-  obj.position.set(vThree.x, vThree.y, vThree.z);
-  return obj;}
+  if (objType === 'floor') {
+    const objGeometry = new THREE.BoxGeometry(10, 5, 10)
+    const material = new THREE.MeshBasicMaterial({ color: 0xEEA47F })
+    const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+    const obj = new THREE.Mesh(objGeometry, material);
+    const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
+    obj.add(wireframeMesh)
+    obj.position.set(vThree.x, vThree.y, vThree.z);
+    return obj;
+  }
+  if (objType === 'wall') {
+    const objGeometry = new THREE.BoxGeometry(10, 10, .2);
+    const material = new THREE.MeshBasicMaterial({ color: 0x0539CFF });
+    const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+    const obj = new THREE.Mesh(objGeometry, material);
+    const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
+    obj.add(wireframeMesh)
+    obj.position.set(vThree.x, vThree.y, vThree.z);
+    return obj;
+  }
+  if(objType === "roof"){
+    const objGeometry = new THREE.BoxGeometry(10, .2, 10);
+    const material = new THREE.MeshBasicMaterial({ color: 0x317773 });
+    const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
+    const obj = new THREE.Mesh(objGeometry, material);
+    const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
+    obj.add(wireframeMesh)
+    obj.position.set(vThree.x, vThree.y, vThree.z);
+    return obj;
+  }
+
 }

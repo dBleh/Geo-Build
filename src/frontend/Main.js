@@ -24,6 +24,7 @@ var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
+const isVisible = true
 
 
 const lockControls = new PointerLockControls(camera, document.body);
@@ -46,36 +47,36 @@ document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
-  if(!eIsdown){
+  if (!eIsdown) {
     if (selectedObject) {
 
-    if ((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null) {
-   
-      if (selectedObject.obj.position.y < -5 || selectedObject.obj.position.y > 5) {
+      if ((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null) {
+
+        if (selectedObject.obj.position.y < -5 || selectedObject.obj.position.y > 5) {
+          scene.remove(selectedObject.obj)
+          selectedObject = null
+          isIntersect = false
+          objToSnap = null
+        }
+      }
+      if ((selectedObject.objType === 'wall' && objToSnap === null) || (selectedObject.objType === 'roof' && objToSnap === null)) {
         scene.remove(selectedObject.obj)
         selectedObject = null
         isIntersect = false
         objToSnap = null
+
       }
-    }
-    if (selectedObject.objType === 'wall' && objToSnap === null) {
-      scene.remove(selectedObject.obj)
+      else {
+        addSnaps(selectedObject)
+      }
+
       selectedObject = null
       isIntersect = false
       objToSnap = null
 
+
     }
-    else {
-      addSnaps(selectedObject)
-    }
-
-    selectedObject = null
-    isIntersect = false
-    objToSnap = null
-
-
   }
-}
 }
 function onMouseUp() {
 }
@@ -121,7 +122,7 @@ function addSnaps(selectedObject) {
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
     snapObjLeft.rotateY(Math.PI / 2)
     scene.add(snapObjLeft);
-    snapObjLeft.visible = false
+    snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
       objType: 'floorLeft',
@@ -131,7 +132,7 @@ function addSnaps(selectedObject) {
     snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
     snapObjRight.rotateY(-Math.PI / 2)
     scene.add(snapObjRight);
-    snapObjRight.visible = false
+    snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
       objType: 'floorRight',
@@ -141,7 +142,7 @@ function addSnaps(selectedObject) {
     snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
     snapObjBack.rotateY(Math.PI)
     scene.add(snapObjBack);
-    snapObjBack.visible = false
+    snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
       objType: 'floorBack',
@@ -150,7 +151,7 @@ function addSnaps(selectedObject) {
     snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
     snapObjFront.quaternion.copy(selectedObject.obj.quaternion);
     scene.add(snapObjFront);
-    snapObjFront.visible = false
+    snapObjFront.visible = isVisible
     snapObjs.push({
       obj: snapObjFront,
       objType: 'floorFront',
@@ -159,12 +160,12 @@ function addSnaps(selectedObject) {
   if (selectedObject.objType === 'wall') {
     // Add snap point to wall object
     const snapPos = new THREE.Vector3(0, 5, 0);
-    snapPos.applyQuaternion(selectedObject.obj.quaternion);
     const snapObj = new THREE.Mesh(objGeometry, mat);
+    snapPos.applyQuaternion(selectedObject.obj.quaternion);
     snapObj.position.copy(selectedObject.obj.position).add(snapPos);
-    snapObj.rotation.y = selectedObject.obj.rotation.y;
+    snapObj.quaternion.copy(selectedObject.obj.quaternion);
     scene.add(snapObj);
-    snapObj.visible = false
+    snapObj.visible = isVisible
     snapObjs.push({
       obj: snapObj,
       objType: 'wall',
@@ -190,7 +191,7 @@ function addSnaps(selectedObject) {
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
     snapObjLeft.rotateY(1.0472 + Math.PI / 2);
     scene.add(snapObjLeft);
-    snapObjLeft.visible = false
+    snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
       objType: 'floorLeftT',
@@ -204,7 +205,7 @@ function addSnaps(selectedObject) {
     snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
     // Transform the position of the new object by the inverse of the snap object's world matrix
     scene.add(snapObjRight);
-    snapObjRight.visible = false
+    snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
       objType: 'floorRightT',
@@ -214,7 +215,7 @@ function addSnaps(selectedObject) {
     snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
     snapObjBack.rotateY(-Math.PI / 2)
     scene.add(snapObjBack);
-    snapObjBack.visible = false
+    snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
       objType: 'floorBackT',
@@ -352,10 +353,23 @@ function animate() {
         else {
           if (selectedObject.objType === "floor" && objToSnap.objType === "wall") {
           }
+          if (selectedObject.objType === "floorT" && objToSnap.objType === "wall") {
+          }if (selectedObject.objType === "roof" && (
+            objToSnap.objType === "floorLeft" ||
+            objToSnap.objType === "floorRight" ||
+            objToSnap.objType === "floorBack" ||
+            objToSnap.objType === "floorFront" ||
+            objToSnap.objType === "floorRightT" ||
+            objToSnap.objType === "floorBackT" ||
+            objToSnap.objType === "floorLeftT"
+          )) {
+            objToSnap = null
+          }
           else {
             isIntersect = true
-            selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject))
+            selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject, snapRadius))
           }
+          
           break
         }
       }
