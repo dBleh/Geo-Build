@@ -32,21 +32,25 @@ export function objIns(vThree, objType) {
     // Set the positions and indices to the geometry
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-    const m = new THREE.MeshPhongMaterial({
-      color: 0xffa500,
+    const m = new THREE.MeshBasicMaterial({
+      color: 0xFCEDDA,
       side: THREE.DoubleSide
     });
+    const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
     const mesh = new THREE.Mesh(geometry, m);
     mesh.position.set(vThree.x, vThree.y, vThree.z);
+    const wireframeMesh = new THREE.Mesh(geometry, wireframeMaterial);
+    mesh.add(wireframeMesh)
     mesh.rotateY(( 3 * Math.PI / 2))
     return mesh
   }
   else{
-    const texture = new THREE.TextureLoader().load( 'src/frontend/wall.jpg' );
-   
   const objGeometry = objType === "floor" ? new THREE.BoxGeometry(10, 5, 10) : new THREE.BoxGeometry(10, 10, .2);
-  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0x00ff00 }) : new THREE.MeshBasicMaterial({  map: texture } );
+  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0xEEA47F }) : new THREE.MeshBasicMaterial({  color:  0x0539CFF } );
+  const wireframeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe: true });
   const obj = new THREE.Mesh(objGeometry, material);
+  const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
+  obj.add(wireframeMesh)
   obj.position.set(vThree.x, vThree.y, vThree.z);
   return obj;}
 }

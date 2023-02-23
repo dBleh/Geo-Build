@@ -46,22 +46,27 @@ document.body.appendChild(renderer.domElement);
 renderer.setClearColor(0x7393B3);
 
 function onMouseDown(event) {
-  
-  if (selectedObject) {
-    
-    if((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null){
-      console.log(selectedObject.obj.position.y)
-      if(selectedObject.obj.position.y < -2 || selectedObject.obj.position.y > 5){
+  if(!eIsdown){
+    if (selectedObject) {
+
+    if ((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null) {
+   
+      if (selectedObject.obj.position.y < -5 || selectedObject.obj.position.y > 5) {
         scene.remove(selectedObject.obj)
+        selectedObject = null
+        isIntersect = false
+        objToSnap = null
       }
     }
-    if(selectedObject.objType === 'wall' && objToSnap === null){
+    if (selectedObject.objType === 'wall' && objToSnap === null) {
       scene.remove(selectedObject.obj)
-   
+      selectedObject = null
+      isIntersect = false
+      objToSnap = null
+
     }
-    else{
-    addSnaps(selectedObject)
-    console.log(selectedObject.material)
+    else {
+      addSnaps(selectedObject)
     }
 
     selectedObject = null
@@ -70,6 +75,7 @@ function onMouseDown(event) {
 
 
   }
+}
 }
 function onMouseUp() {
 }
@@ -236,6 +242,7 @@ export function addObj(objType) {
   scene.add(obj);
 }
 var wIsDown = false
+var eIsdown = false
 var sIsDown = false
 var aIsDown = false
 var dIsDown = false
@@ -249,8 +256,8 @@ var lControl = false
 function onKeyDown(event) {
   event.preventDefault();
   if (event.key === 'e') {
+    eIsdown = true
     lockControls.unlock();
-    console.log("pointer locked to screen")
   }
 
   if (event.key === "w") {
@@ -271,14 +278,15 @@ function onKeyDown(event) {
   if (event.key === "x") {
     lControl = true
   }
- 
+
 
 }
 function onKeyUp(event) {
   event.preventDefault();
   if (event.key === 'e') {
+    eIsdown = false
     lockControls.lock();
-    console.log("pointer locked to screen")
+
   }
   if (event.key === 'w') {
     wIsDown = false
@@ -353,7 +361,7 @@ function animate() {
       }
     }
     snapRadius.visible = true
-   
+
   }
   if (!isDragging) {
     snapRadius.visible = false
@@ -378,7 +386,7 @@ function animate() {
   }
 
   renderer.render(scene, camera);
-  
+
 }
 export default animate;
 document.addEventListener('keydown', onKeyDown)

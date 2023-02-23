@@ -7,13 +7,9 @@ function Popup() {
   }
   return (
     <section className="custom-details">
-      
-     
-        <li onClick={() => onClick("wall")}>Add Wall</li>
-        <li onClick={() => onClick("floorT")}>Add Triangle Floor</li>
-        <li onClick={() => onClick("floor")}>Add Floor</li>  
-    
-      
+        <li onClick={() => onClick("wall")}>Wall</li>
+        <li onClick={() => onClick("floorT")}>Triangle Foundation</li>
+        <li onClick={() => onClick("floor")}>Square Foundation</li>      
     </section>
   );
 }
