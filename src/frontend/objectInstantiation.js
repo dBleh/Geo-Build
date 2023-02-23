@@ -42,8 +42,10 @@ export function objIns(vThree, objType) {
     return mesh
   }
   else{
+    const texture = new THREE.TextureLoader().load( 'src/frontend/wall.jpg' );
+   
   const objGeometry = objType === "floor" ? new THREE.BoxGeometry(10, 5, 10) : new THREE.BoxGeometry(10, 10, .2);
-  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0x00ff00 }) : new THREE.MeshBasicMaterial({ color: 0x0ff0 });
+  const material = objType === "floor" ? new THREE.MeshBasicMaterial({ color: 0x00ff00 }) : new THREE.MeshBasicMaterial({  map: texture } );
   const obj = new THREE.Mesh(objGeometry, material);
   obj.position.set(vThree.x, vThree.y, vThree.z);
   return obj;}

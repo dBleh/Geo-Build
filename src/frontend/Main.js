@@ -24,7 +24,6 @@ var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
-var isOpen = FontFaceSetLoadEvent
 
 
 const lockControls = new PointerLockControls(camera, document.body);
@@ -49,8 +48,21 @@ renderer.setClearColor(0x7393B3);
 function onMouseDown(event) {
   
   if (selectedObject) {
-    console.log(selectedObject.obj.rotation)
+    
+    if((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null){
+      console.log(selectedObject.obj.position.y)
+      if(selectedObject.obj.position.y < -2 || selectedObject.obj.position.y > 5){
+        scene.remove(selectedObject.obj)
+      }
+    }
+    if(selectedObject.objType === 'wall' && objToSnap === null){
+      scene.remove(selectedObject.obj)
+   
+    }
+    else{
     addSnaps(selectedObject)
+    console.log(selectedObject.material)
+    }
 
     selectedObject = null
     isIntersect = false
@@ -306,6 +318,7 @@ function animate() {
   var deltaTime = time - lastTime
   lastTime = time
 
+
   if (selectedObject) {
     var v = camera.getWorldPosition(new THREE.Vector3())
     v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
@@ -340,6 +353,7 @@ function animate() {
       }
     }
     snapRadius.visible = true
+   
   }
   if (!isDragging) {
     snapRadius.visible = false

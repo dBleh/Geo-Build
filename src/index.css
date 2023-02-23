@@ -17,7 +17,7 @@ canvas {
   left: 0;
   z-index: 0;
 }
-section{
+section {
   position:fixed;
   text-align: center;
   top: 35vh;
@@ -29,6 +29,11 @@ section{
   color:rgb(45, 45, 45);
   font-family: sans-serif;
   border-radius: 200px;
+}
+section li{
+  margin-left:0px;
+  margin-top:50px;
+  list-style: none;
 }
 
 header {
@@ -42,14 +47,15 @@ header {
   color:rgb(45, 45, 45);
   font-family: sans-serif;
 }
-header ul {
+ul {
   display: flex;
   flex-direction:  row;
   
   list-style: none;
 }
-header li{
+li{
   margin-left:10px;
+  list-style: none;
 }
 .popup-box {
   position: relative;
