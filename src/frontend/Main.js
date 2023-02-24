@@ -24,7 +24,7 @@ var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
-const isVisible = true
+const isVisible = false
 var objHighlighted = null
 var origMat = null
 
@@ -51,6 +51,7 @@ renderer.setClearColor(0x7393B3);
 function onMouseDown(event) {
   if (!eIsdown) {
     if (selectedObject) {
+      console.log(selectedObject)
 
       if ((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null) {
 
@@ -123,7 +124,7 @@ function addSnaps(selectedObject) {
     snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
     snapObjLeft.rotateY(Math.PI / 2)
-    scene.add(snapObjLeft);
+    selectedObject.obj.parent.add(snapObjLeft);
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
@@ -133,7 +134,7 @@ function addSnaps(selectedObject) {
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
     snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
     snapObjRight.rotateY(-Math.PI / 2)
-    scene.add(snapObjRight);
+    selectedObject.obj.parent.add(snapObjRight);
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
@@ -143,7 +144,7 @@ function addSnaps(selectedObject) {
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
     snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
     snapObjBack.rotateY(Math.PI)
-    scene.add(snapObjBack);
+    selectedObject.obj.parent.add(snapObjBack);
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
@@ -152,7 +153,7 @@ function addSnaps(selectedObject) {
     const snapObjFront = new THREE.Mesh(objGeometry, matT);
     snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
     snapObjFront.quaternion.copy(selectedObject.obj.quaternion);
-    scene.add(snapObjFront);
+    selectedObject.obj.parent.add(snapObjFront);
     snapObjFront.visible = isVisible
     snapObjs.push({
       obj: snapObjFront,
@@ -184,7 +185,7 @@ function addSnaps(selectedObject) {
     snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
     snapObjLeft.rotateY(Math.PI / 2)
-    scene.add(snapObjLeft);
+    selectedObject.obj.parent.add(snapObjLeft);
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
@@ -194,7 +195,7 @@ function addSnaps(selectedObject) {
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
     snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
     snapObjRight.rotateY(-Math.PI / 2)
-    scene.add(snapObjRight);
+    selectedObject.obj.parent.add(snapObjRight);
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
@@ -204,7 +205,7 @@ function addSnaps(selectedObject) {
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
     snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
     snapObjBack.rotateY(Math.PI)
-    scene.add(snapObjBack);
+    selectedObject.obj.parent.add(snapObjBack);
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
@@ -213,7 +214,7 @@ function addSnaps(selectedObject) {
     const snapObjFront = new THREE.Mesh(objGeometry, matT);
     snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
     snapObjFront.quaternion.copy(selectedObject.obj.quaternion);
-    scene.add(snapObjFront);
+    selectedObject.obj.parent.add(snapObjFront);
     snapObjFront.visible = isVisible
     snapObjs.push({
       obj: snapObjFront,
@@ -227,7 +228,7 @@ function addSnaps(selectedObject) {
     snapPos.applyQuaternion(selectedObject.obj.quaternion);
     snapObj.position.copy(selectedObject.obj.position).add(snapPos);
     snapObj.quaternion.copy(selectedObject.obj.quaternion);
-    scene.add(snapObj);
+    selectedObject.obj.parent.add(snapObj);
     snapObj.visible = isVisible
     snapObjs.push({
       obj: snapObj,
@@ -241,7 +242,7 @@ function addSnaps(selectedObject) {
     snapPos.applyQuaternion(selectedObject.obj.quaternion);
     snapObj.position.copy(selectedObject.obj.position).add(snapPos);
     snapObj.quaternion.copy(selectedObject.obj.quaternion);
-    scene.add(snapObj);
+    selectedObject.obj.parent.add(snapObj);
     snapObj.visible = isVisible
     snapObjs.push({
       obj: snapObj,
@@ -267,7 +268,7 @@ function addSnaps(selectedObject) {
     snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
     snapObjLeft.rotateY(1.0472 + Math.PI / 2);
-    scene.add(snapObjLeft);
+    selectedObject.obj.parent.add(snapObjLeft);
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
@@ -281,7 +282,7 @@ function addSnaps(selectedObject) {
     const snapWorldInverse = new THREE.Matrix4();
     snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
     // Transform the position of the new object by the inverse of the snap object's world matrix
-    scene.add(snapObjRight);
+    selectedObject.obj.parent.add(snapObjRight);
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
@@ -291,7 +292,7 @@ function addSnaps(selectedObject) {
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
     snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
     snapObjBack.rotateY(-Math.PI / 2)
-    scene.add(snapObjBack);
+    selectedObject.obj.parent.add(snapObjBack);
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
@@ -317,7 +318,7 @@ function addSnaps(selectedObject) {
     snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
     snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
     snapObjLeft.rotateY(1.0472 + Math.PI / 2);
-    scene.add(snapObjLeft);
+    selectedObject.obj.parent.add(snapObjLeft);
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
@@ -331,7 +332,7 @@ function addSnaps(selectedObject) {
     const snapWorldInverse = new THREE.Matrix4();
     snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
     // Transform the position of the new object by the inverse of the snap object's world matrix
-    scene.add(snapObjRight);
+    selectedObject.obj.parent.add(snapObjRight);
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
@@ -341,7 +342,7 @@ function addSnaps(selectedObject) {
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
     snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
     snapObjBack.rotateY(-Math.PI / 2)
-    scene.add(snapObjBack);
+    selectedObject.obj.parent.add(snapObjBack);
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
@@ -357,7 +358,7 @@ export function addObj(objType) {
   vThree.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 20)
   const obj = objIns(vThree, objType)
   const t = {
-    obj: obj,
+    obj: obj.children[0],
     objType: objType,
   }
   objs.push(t)
@@ -365,9 +366,10 @@ export function addObj(objType) {
     scene.remove(selectedObject.obj)
   }
   selectedObject = {
-    obj: obj,
+    obj: obj.children[0],
     objType: objType,
   }
+  console.log(obj.children[0].parent)
   scene.add(obj);
 }
 var wIsDown = false
@@ -391,6 +393,12 @@ function onKeyDown(event) {
 
   if (event.key === "w") {
     wIsDown = true
+  }
+  if (event.key === "r") {
+    console.log(objHighlighted)
+    if(objHighlighted){
+      scene.remove(objHighlighted.object.parent)
+    }
   }
   if (event.key === "s") {
     sIsDown = true
@@ -443,7 +451,7 @@ function onMouseMove(event) {
     const deltaY = event.movementX * 0.002
     selectedObject.obj.rotation.y -= deltaY;
     selectedObject.obj.rotation.z = 0;
-  }  if(objs.length > 0){
+  }  if(objs.length > 0 && !selectedObject){
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const canvas = document.querySelector('canvas'); // Replace with your canvas element

@@ -5,16 +5,15 @@ export function objIns(vThree, objType) {
   if (!(vThree instanceof THREE.Vector3)) {
     throw new Error('vThree must be an instance of THREE.Vector3');
   }
+  const pObj = new THREE.Object3D();
   if (objType === "floorT") {
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array([
       // Define the vertices of the base triangle
-
       0, 0, -5,
       0, 0, 5,
       -8.66025, 0, -0,
       // Define the vertices of the top triangle
-
       0, 5, -5,
       0, 5, 5,
       -8.66025, 5, -0,
@@ -40,11 +39,13 @@ export function objIns(vThree, objType) {
     const mesh = new THREE.Mesh(geometry, m);
     mesh.position.set(vThree.x, vThree.y, vThree.z);
     const wireframeMesh = new THREE.Mesh(geometry, wireframeMaterial);
-    mesh.add(wireframeMesh)
-    mesh.rotateY((3 * Math.PI / 2))
-    return mesh
+    mesh.add(wireframeMesh);
+    mesh.rotateY((3 * Math.PI / 2));
+    pObj.add(mesh)
+    return pObj;
   }
   if (objType === "roofT") {
+    const pObj = new THREE.Object3D()
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array([
       // Define the vertices of the base triangle
@@ -81,7 +82,9 @@ export function objIns(vThree, objType) {
     const wireframeMesh = new THREE.Mesh(geometry, wireframeMaterial);
     mesh.add(wireframeMesh)
     mesh.rotateY((3 * Math.PI / 2))
-    return mesh
+    pObj.add(mesh)
+    console.log(pObj)
+    return pObj;
   }
   if (objType === 'floor') {
     const objGeometry = new THREE.BoxGeometry(10, 5, 10)
@@ -91,7 +94,8 @@ export function objIns(vThree, objType) {
     const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
     obj.add(wireframeMesh)
     obj.position.set(vThree.x, vThree.y, vThree.z);
-    return obj;
+    pObj.add(obj)
+    return pObj;
   }
   if (objType === 'wall') {
     const objGeometry = new THREE.BoxGeometry(10, 10, .2);
@@ -101,7 +105,8 @@ export function objIns(vThree, objType) {
     const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
     obj.add(wireframeMesh)
     obj.position.set(vThree.x, vThree.y, vThree.z);
-    return obj;
+    pObj.add(obj)
+    return pObj;
   }
   if (objType === "roof") {
     const objGeometry = new THREE.BoxGeometry(10, .2, 10);
@@ -111,7 +116,8 @@ export function objIns(vThree, objType) {
     const wireframeMesh = new THREE.Mesh(objGeometry, wireframeMaterial);
     obj.add(wireframeMesh)
     obj.position.set(vThree.x, vThree.y, vThree.z);
-    return obj;
+    pObj.add(obj)
+    return pObj;
   }
   if (objType === 'door') {
     const wall = new THREE.Shape();
@@ -142,8 +148,9 @@ export function objIns(vThree, objType) {
 
     // add wireframe as child of door mesh
     mesh.add(wireframe);
+    pObj.add(mesh)
 
-    return mesh;
+    return pObj;
 }
 
 }
