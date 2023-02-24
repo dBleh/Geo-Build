@@ -3,7 +3,7 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { getIntersectObj, setPosition } from './inAnimation';
+import { getIntersectObj, setPosition} from './inAnimation';
 
 // add the PointerLockControls to the scene
 
@@ -25,6 +25,8 @@ var objs = []
 var isIntersect = false
 var objToSnap = null
 const isVisible = true
+var objHighlighted = null
+var origMat = null
 
 
 const lockControls = new PointerLockControls(camera, document.body);
@@ -157,6 +159,67 @@ function addSnaps(selectedObject) {
       objType: 'floorFront',
     });
   }
+  if (selectedObject.objType === 'roof') {
+    // Add snap points to floor object
+    const snapPositions = {
+      right: new THREE.Vector3(5, 0, 0),
+      back: new THREE.Vector3(0, 0, 5),
+      front: new THREE.Vector3(0, 0, - 5),
+      left: new THREE.Vector3(-5, 0, 0),
+    };
+
+    const q = new THREE.Quaternion();
+    q.copy(selectedObject.obj.quaternion);
+
+    snapPositions.right.applyQuaternion(q);
+    snapPositions.left.applyQuaternion(q);
+    snapPositions.front.applyQuaternion(q);
+    snapPositions.back.applyQuaternion(q);
+
+    const mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+
+    const objGeometry = new THREE.BoxGeometry(1, 1, 1);
+
+    const snapObjLeft = new THREE.Mesh(objGeometry, mat);
+    snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
+    snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjLeft.rotateY(Math.PI / 2)
+    scene.add(snapObjLeft);
+    snapObjLeft.visible = isVisible
+    snapObjs.push({
+      obj: snapObjLeft,
+      objType: 'roofLeft',
+    });
+    const snapObjRight = new THREE.Mesh(objGeometry, mat);
+    snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
+    snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjRight.rotateY(-Math.PI / 2)
+    scene.add(snapObjRight);
+    snapObjRight.visible = isVisible
+    snapObjs.push({
+      obj: snapObjRight,
+      objType: 'roofRight',
+    });
+    const snapObjBack = new THREE.Mesh(objGeometry, matT);
+    snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
+    snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjBack.rotateY(Math.PI)
+    scene.add(snapObjBack);
+    snapObjBack.visible = isVisible
+    snapObjs.push({
+      obj: snapObjBack,
+      objType: 'roofBack',
+    });
+    const snapObjFront = new THREE.Mesh(objGeometry, matT);
+    snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
+    snapObjFront.quaternion.copy(selectedObject.obj.quaternion);
+    scene.add(snapObjFront);
+    snapObjFront.visible = isVisible
+    snapObjs.push({
+      obj: snapObjFront,
+      objType: 'roofFront',
+    });
+  }
   if (selectedObject.objType === 'wall') {
     // Add snap point to wall object
     const snapPos = new THREE.Vector3(0, 5, 0);
@@ -169,6 +232,20 @@ function addSnaps(selectedObject) {
     snapObjs.push({
       obj: snapObj,
       objType: 'wall',
+    });
+  }
+  if (selectedObject.objType === 'door') {
+    // Add snap point to wall object
+    const snapPos = new THREE.Vector3(0, 5, 0);
+    const snapObj = new THREE.Mesh(objGeometry, mat);
+    snapPos.applyQuaternion(selectedObject.obj.quaternion);
+    snapObj.position.copy(selectedObject.obj.position).add(snapPos);
+    snapObj.quaternion.copy(selectedObject.obj.quaternion);
+    scene.add(snapObj);
+    snapObj.visible = isVisible
+    snapObjs.push({
+      obj: snapObj,
+      objType: 'door',
     });
   }
   if (selectedObject.objType === 'floorT') {
@@ -221,6 +298,57 @@ function addSnaps(selectedObject) {
       objType: 'floorBackT',
     });
   }
+  if (selectedObject.objType === 'roofT') {
+    // Add snap points to floorT object
+    const snapPositions = {
+      back: new THREE.Vector3(0, .1, 0),
+      right: new THREE.Vector3(-4.33013, .1, -2.5),
+      left: new THREE.Vector3(-4.33013, .1, 2.5),
+    };
+    // Rotate snap positions based on object orientation
+    snapPositions.right.applyQuaternion(selectedObject.obj.quaternion);
+    snapPositions.left.applyQuaternion(selectedObject.obj.quaternion);
+    snapPositions.back.applyQuaternion(selectedObject.obj.quaternion);
+    // Define the dimensions of the squares
+    // Define the geometry for the squares
+    const squareGeometry = new THREE.BoxGeometry(1, 1, 1);
+    // Create the square meshes and add them to the scene
+    const snapObjLeft = new THREE.Mesh(squareGeometry, mat);
+    snapObjLeft.position.copy(selectedObject.obj.position).add(snapPositions.left);
+    snapObjLeft.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjLeft.rotateY(1.0472 + Math.PI / 2);
+    scene.add(snapObjLeft);
+    snapObjLeft.visible = isVisible
+    snapObjs.push({
+      obj: snapObjLeft,
+      objType: 'roofLeftT',
+    });
+    const snapObjRight = new THREE.Mesh(objGeometry, mat);
+    snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
+    snapObjRight.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjRight.rotateY(-1.0472 + Math.PI / 2);
+    // Get the inverse of the snap object's world matrix
+    const snapWorldInverse = new THREE.Matrix4();
+    snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
+    // Transform the position of the new object by the inverse of the snap object's world matrix
+    scene.add(snapObjRight);
+    snapObjRight.visible = isVisible
+    snapObjs.push({
+      obj: snapObjRight,
+      objType: 'roofRightT',
+    });
+    const snapObjBack = new THREE.Mesh(squareGeometry, mat);
+    snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
+    snapObjBack.quaternion.copy(selectedObject.obj.quaternion);
+    snapObjBack.rotateY(-Math.PI / 2)
+    scene.add(snapObjBack);
+    snapObjBack.visible = isVisible
+    snapObjs.push({
+      obj: snapObjBack,
+      objType: 'roofBackT',
+    });
+  }
+
 }
 //move this
 export function addObj(objType) {
@@ -315,7 +443,48 @@ function onMouseMove(event) {
     const deltaY = event.movementX * 0.002
     selectedObject.obj.rotation.y -= deltaY;
     selectedObject.obj.rotation.z = 0;
-  }
+  }  if(objs.length > 0){
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    const canvas = document.querySelector('canvas'); // Replace with your canvas element
+  
+    // Calculate mouse position in normalized device coordinates
+    // (-1 to +1) for both components
+    mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
+    mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
+  
+    // Set the origin and direction of the raycaster based on the camera and mouse position
+    raycaster.setFromCamera(mouse, camera);
+    var objInScene = []
+  
+    // Find all objects that intersect with the 
+    for(var i = 0; i < objs.length ;i++){
+      objInScene.push(objs[i].obj)
+
+    }
+    const intersects = raycaster.intersectObjects(objInScene);
+  const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff , wireframe: true });
+  // Return the closest intersected object, or null if there are none
+  if (intersects.length > 0) {
+    // If the intersected object is not already highlighted, highlight it
+    if (intersects[0].object.material !== basicMaterial) {
+      // If another object was previously highlighted, reset its material to the original material
+      if (objHighlighted !== null) {
+        objHighlighted.object.material = origMat;
+      }
+      // Set the material of the intersected object to the basic material
+      objHighlighted = intersects[0];
+      origMat = intersects[0].object.material;
+      intersects[0].object.material = basicMaterial;
+    }
+  } else {
+    // If there are no intersections, reset the material of the previously highlighted object (if any)
+    if (objHighlighted !== null) {
+      objHighlighted.object.material = origMat;
+      objHighlighted = null;
+      origMat = null;
+    }
+  }}
 }
 
 let time = new Date()
@@ -326,6 +495,9 @@ function animate() {
   time = new Date()
   var deltaTime = time - lastTime
   lastTime = time
+  
+
+  
 
 
   if (selectedObject) {

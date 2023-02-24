@@ -10,7 +10,9 @@ function Popup() {
         <li onClick={() => onClick("wall")}>Wall</li>
         <li onClick={() => onClick("floorT")}>Triangle Foundation</li>
         <li onClick={() => onClick("floor")}>Square Foundation</li>      
-        <li onClick={() => onClick("roof")}>Square Roof</li>    
+        <li onClick={() => onClick("roof")}>Square Roof</li>
+        <li onClick={() => onClick("roofT")}>Triangle Roof</li>    
+        <li onClick={() => onClick("door")}>Door</li> 
     </section>
   );
 }
