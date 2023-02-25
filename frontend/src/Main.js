@@ -7,8 +7,6 @@ import { getIntersectObj, setPosition } from './inAnimation';
 
 
 // add the PointerLockControls to the scene
-
-
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 camera.position.set(-4, 10, 20); // set camera position
@@ -28,26 +26,52 @@ var objToSnap = null
 const isVisible = true
 var objHighlighted = null
 var origMat = null
+var isStarted = false
+var lockControls = null
+var light = null
+var gridHelper = null
+var snapRadius = null
+var renderer = null
 
 
-const lockControls = new PointerLockControls(camera, document.body);
-scene.add(lockControls.getObject())
 
-const light = new THREE.PointLight(0xffffff, 1, 100);
-light.position.set(0, 0, 10);
-scene.add(light);
+function init() {
+  lockControls = new PointerLockControls(camera, document.body);
+  scene.add(lockControls.getObject())
 
-const gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x888788);
-scene.add(gridHelper);
-grid.push(gridHelper)
+  light = new THREE.PointLight(0xffffff, 1, 100);
+  light.position.set(0, 0, 10);
+  scene.add(light);
 
-var snapRadius = new THREE.Mesh(new THREE.SphereGeometry(5, 32, 32), material);
-scene.add(snapRadius)
+  gridHelper = new THREE.GridHelper(100, 100, 0x444444, 0x888788);
+  scene.add(gridHelper);
+  grid.push(gridHelper)
 
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-renderer.setClearColor(0x7393B3);
+  snapRadius = new THREE.Mesh(new THREE.SphereGeometry(5, 32, 32), material);
+  scene.add(snapRadius)
+
+
+  renderer = new THREE.WebGLRenderer({});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+  renderer.setClearColor(0x8AAAE5);
+
+  const dragControls = new DragControls(cubes, camera, renderer.domElement)
+  dragControls.addEventListener('dragstart', function (event) {
+    isDragging = true;
+    event.object.material.opacity = 0.33;
+  })
+  dragControls.addEventListener('dragend', function (event) {
+    isDragging = false;
+    event.object.material.opacity = 1;
+
+  })
+  document.addEventListener('keydown', onKeyDown)
+  document.addEventListener('keyup', onKeyUp)
+  document.addEventListener('mousedown', onMouseDown);
+  document.addEventListener('mouseup', onMouseUp);
+  document.addEventListener('mousemove', onMouseMove)
+}
 
 function onMouseDown(event) {
   if (!eIsdown) {
@@ -84,16 +108,7 @@ function onMouseUp() {
 }
 
 
-const dragControls = new DragControls(cubes, camera, renderer.domElement)
-dragControls.addEventListener('dragstart', function (event) {
-  isDragging = true;
-  event.object.material.opacity = 0.33;
-})
-dragControls.addEventListener('dragend', function (event) {
-  isDragging = false;
-  event.object.material.opacity = 1;
 
-})
 function addSnaps(selectedObject) {
   const objGeometry = new THREE.BoxGeometry(1, 1, 1);
   const matT = new THREE.MeshBasicMaterial({ color: 0xf00fff });
@@ -396,8 +411,8 @@ function onKeyDown(event) {
   }
   if (event.key === "r") {
     if (objHighlighted) {
-      for(var i = 0; i < objs.length; i++){
-        if(objs[i].obj.parent === objHighlighted.object.parent){
+      for (var i = 0; i < objs.length; i++) {
+        if (objs[i].obj.parent === objHighlighted.object.parent) {
           scene.remove(objHighlighted.object.parent)
           objs.splice(i, 1);
           i = i - 1
@@ -421,7 +436,7 @@ function onKeyDown(event) {
     aIsDown = true
   }
   if (event.key === "d") {
-    
+
     dIsDown = true
   }
   if (event.key === " ") {
@@ -453,151 +468,188 @@ function onKeyUp(event) {
   }
   if (event.key === " ") {
     spaceIsDown = false
+    const canvas = document.getElementById('canvas');
   }
   if (event.key === "x") {
     lControl = false
   }
 }
 function onMouseMove(event) {
-  if (selectedObject && lockControls.isLocked) {
-    const deltaY = event.movementX * 0.002
-    selectedObject.obj.rotation.y -= deltaY;
-    selectedObject.obj.rotation.z = 0;
-  } if (objs.length > 0 && !selectedObject) {
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    const canvas = document.querySelector('canvas'); // Replace with your canvas element
+  const canvas = document.querySelector('canvas');
+  if (canvas) {
+    if (selectedObject && lockControls.isLocked) {
+      const deltaY = event.movementX * 0.002
+      selectedObject.obj.rotation.y -= deltaY;
+      selectedObject.obj.rotation.z = 0;
+    } if (objs.length > 0 && !selectedObject) {
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      const canvas = document.querySelector('canvas'); // Replace with your canvas element
 
-    // Calculate mouse position in normalized device coordinates
-    // (-1 to +1) for both components
-    mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
-    mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
+      // Calculate mouse position in normalized device coordinates
+      // (-1 to +1) for both components
+      mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
+      mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
 
-    // Set the origin and direction of the raycaster based on the camera and mouse position
-    raycaster.setFromCamera(mouse, camera);
-    var objInScene = []
+      // Set the origin and direction of the raycaster based on the camera and mouse position
+      raycaster.setFromCamera(mouse, camera);
+      var objInScene = []
 
-    // Find all objects that intersect with the 
-    for (var i = 0; i < objs.length; i++) {
-      objInScene.push(objs[i].obj)
-    }
-    const intersects = raycaster.intersectObjects(objInScene);
-
-    const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
-    // Return the closest intersected object, or null if there are none
-    if (intersects.length > 0) {
-      // If the intersected object is not already highlighted, highlight it
-
-      // If another object was previously highlighted, reset its material to the original material
-      if (objHighlighted !== null) {
-        objHighlighted.object.material = origMat;
+      // Find all objects that intersect with the 
+      for (var i = 0; i < objs.length; i++) {
+        objInScene.push(objs[i].obj)
       }
-      // Set the material of the intersected object to the basic material
-      objHighlighted = intersects[0];
-      origMat = intersects[0].object.material;
-      intersects[0].object.material = basicMaterial;
+      const intersects = raycaster.intersectObjects(objInScene);
 
-    } else {
-      // If there are no intersections, reset the material of the previously highlighted object (if any)
-      if (objHighlighted !== null) {
-        objHighlighted.object.material = origMat;
-        objHighlighted = null;
-        origMat = null;
+      const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+      // Return the closest intersected object, or null if there are none
+      if (intersects.length > 0) {
+        // If the intersected object is not already highlighted, highlight it
+
+        // If another object was previously highlighted, reset its material to the original material
+        if (objHighlighted !== null) {
+          objHighlighted.object.material = origMat;
+        }
+        // Set the material of the intersected object to the basic material
+        objHighlighted = intersects[0];
+        origMat = intersects[0].object.material;
+        intersects[0].object.material = basicMaterial;
+
+      } else {
+        // If there are no intersections, reset the material of the previously highlighted object (if any)
+        if (objHighlighted !== null) {
+          objHighlighted.object.material = origMat;
+          objHighlighted = null;
+          origMat = null;
+        }
       }
     }
   }
 }
-
+let requestId;
 let time = new Date()
 let lastTime = time
 // Render the scene
 function animate() {
-  requestAnimationFrame(animate);
-  time = new Date()
-  var deltaTime = time - lastTime
-  lastTime = time
-
-
-
-
-
-  if (selectedObject) {
-    var v = camera.getWorldPosition(new THREE.Vector3())
-    v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-    snapRadius.position.set(v.x, v.y - 10, v.z)
-    if (snapObjs.length === 0) {
-      isIntersect = false
-      v = camera.getWorldPosition(new THREE.Vector3())
+  if (isStarted === false) {
+    init()
+    isStarted = true
+  }
+  if (isStarted) {
+    requestId = requestAnimationFrame(animate);
+    time = new Date()
+    var deltaTime = time - lastTime
+    lastTime = time
+    if (selectedObject) {
+      var v = camera.getWorldPosition(new THREE.Vector3())
       v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-      selectedObject.obj.position.set(v.x, v.y - 10, v.z)
-    }
-    else {
-      for (let i = 0; i < snapObjs.length; i++) {
-        objToSnap = snapObjs[i]
-        const intersectedObj = getIntersectObj(snapObjs[i], snapRadius)
+      snapRadius.position.set(v.x, v.y - 10, v.z)
+      if (snapObjs.length === 0) {
+        isIntersect = false
+        v = camera.getWorldPosition(new THREE.Vector3())
+        v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
+        selectedObject.obj.position.set(v.x, v.y - 10, v.z)
+      }
+      else {
+        for (let i = 0; i < snapObjs.length; i++) {
+          objToSnap = snapObjs[i]
+          const intersectedObj = getIntersectObj(snapObjs[i], snapRadius)
 
-        if (!intersectedObj) {
-          objToSnap = null
-          isIntersect = false
-          v = camera.getWorldPosition(new THREE.Vector3())
-          v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
-          selectedObject.obj.position.set(v.x, v.y - 10, v.z)
-        }
-        else {
-          if (selectedObject.objType === "floor" && objToSnap.objType === "wall") {
-          }
-          if (selectedObject.objType === "floorT" && objToSnap.objType === "wall") {
-          } if (selectedObject.objType === "roof" && (
-            objToSnap.objType === "floorLeft" ||
-            objToSnap.objType === "floorRight" ||
-            objToSnap.objType === "floorBack" ||
-            objToSnap.objType === "floorFront" ||
-            objToSnap.objType === "floorRightT" ||
-            objToSnap.objType === "floorBackT" ||
-            objToSnap.objType === "floorLeftT"
-          )) {
+          if (!intersectedObj) {
             objToSnap = null
+            isIntersect = false
+            v = camera.getWorldPosition(new THREE.Vector3())
+            v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
+            selectedObject.obj.position.set(v.x, v.y - 10, v.z)
           }
           else {
-            isIntersect = true
-            selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject, snapRadius))
-          }
+            if (selectedObject.objType === "floor" && objToSnap.objType === "wall") {
+            }
+            if (selectedObject.objType === "floorT" && objToSnap.objType === "wall") {
+            } if (selectedObject.objType === "roof" && (
+              objToSnap.objType === "floorLeft" ||
+              objToSnap.objType === "floorRight" ||
+              objToSnap.objType === "floorBack" ||
+              objToSnap.objType === "floorFront" ||
+              objToSnap.objType === "floorRightT" ||
+              objToSnap.objType === "floorBackT" ||
+              objToSnap.objType === "floorLeftT"
+            )) {
+              objToSnap = null
+            }
+            else {
+              isIntersect = true
+              selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject, snapRadius))
+            }
 
-          break
+            break
+          }
         }
       }
+      snapRadius.visible = true
+
     }
-    snapRadius.visible = true
+    if (!isDragging) {
+      snapRadius.visible = false
+    }
+    if (wIsDown) {
+      camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), .01 * deltaTime)
+    }
+    if (sIsDown) {
+      camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), -.01 * deltaTime)
+    }
+    if (aIsDown) {
+      camera.translateX(-.01 * deltaTime)
+    }
+    if (dIsDown) {
+      camera.translateX(.01 * deltaTime)
+    }
+    if (spaceIsDown) {
+      camera.translateY(.01 * deltaTime)
+    }
+    if (lControl) {
+      camera.translateY(-.01 * deltaTime)
+    }
 
+    renderer.render(scene, camera);
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'e') {
+        document.querySelector('section').style.display = "block";
+      }
+    });
+    document.addEventListener('keyup', function (event) {
+      if (event.key === 'e') {
+        document.querySelector('section').style.display = "none";
+      }
+    });
   }
-  if (!isDragging) {
-    snapRadius.visible = false
-  }
-  if (wIsDown) {
-    camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), .01 * deltaTime)
-  }
-  if (sIsDown) {
-    camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), -.01 * deltaTime)
-  }
-  if (aIsDown) {
-    camera.translateX(-.01 * deltaTime)
-  }
-  if (dIsDown) {
-    camera.translateX(.01 * deltaTime)
-  }
-  if (spaceIsDown) {
-    camera.translateY(.01 * deltaTime)
-  }
-  if (lControl) {
-    camera.translateY(-.01 * deltaTime)
-  }
-
-  renderer.render(scene, camera);
-
 }
-export default animate;
-document.addEventListener('keydown', onKeyDown)
-document.addEventListener('keyup', onKeyUp)
-document.addEventListener('mousedown', onMouseDown);
-document.addEventListener('mouseup', onMouseUp);
-document.addEventListener('mousemove', onMouseMove)
+function stop() {
+  selectedObject = null
+  cubes =[]
+  
+  
+  snapObjs = []
+  objs =[]
+  objToSnap = []
+
+  
+  while (scene.children.length > 0) {
+    scene.remove(scene.children[0]);
+  }
+  const canvas = renderer.domElement;
+  canvas.remove();
+
+  cancelAnimationFrame(requestId);
+
+  document.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('keyup', onKeyUp)
+  document.removeEventListener('mousedown', onMouseDown);
+  document.removeEventListener('mouseup', onMouseUp);
+  document.removeEventListener('mousemove', onMouseMove)
+
+  isStarted = false;
+}
+
+export { animate, stop };
+

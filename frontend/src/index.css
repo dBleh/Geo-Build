@@ -30,9 +30,50 @@ section {
   color:rgb(45, 45, 45);
   font-family: sans-serif;
   border-radius: 200px;
+  display: none;
 }
+
 section li{
   margin-left:93px;
+}
+.loginPage{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #8AAAE5;
+  width: 100vw;
+  height: 100vh;
+}
+.heading {
+  font-size: 2rem;
+  font-weight: 8000;
+  margin-bottom: 50px;
+  padding: 0 20px;
+  color: rgb(20, 18, 19);
+  border-radius: 200px;
+}
+.logBtn{
+  background-color:#8AAAE5 ;
+  margin-left:75vw ;
+  border: 1px solid #000000;
+
+}
+.activeLink {
+  display: flex;
+  margin-top: 3px;
+  margin-left: 30px;
+  color: rgb(56, 56, 56);
+  text-decoration: none;
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e6e6e6;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-family: inherit;
 }
 .listOne{  
   position: absolute;
@@ -66,7 +107,7 @@ header {
   top: 0;
   width: 100%;
   height:5.5vh;
-  background-color: #E2D1F9;
+  background-color: #EA738DFF;
   z-index: 1;
   color:rgb(45, 45, 45);
   font-family: sans-serif;
@@ -83,7 +124,7 @@ li{
 }
 h1{
   position: relative;
-  margin-top: -5px;
-  font-size: 25px;
+  margin-top: 1px;
+  font-size: 20px;
 }
 

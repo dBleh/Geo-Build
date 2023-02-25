@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import {  reset, login } from '../features/authSlice'
+import {  reset, register } from '../features/authSlice'
 
 
-function Login() {
+function Register() {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    name: '',
+  email: '',
+  password: '',
+  password2: ''
   })
-  const { email, password, } = formData
+  const {name, email, password, password2} = formData
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { user,isError, isSuccess, message } = useSelector(
@@ -34,27 +36,39 @@ function Login() {
   const onSubmit = (e) => {
     e.preventDefault()
     const userData = {
+      name,
       email,
       password,
+      password2
     }
-    dispatch(login(userData))
+    dispatch(register(userData))
   }
   return (
     <>
-    <div className='loginPage'>
-      <div  className='heading'>
-        
-        <p>Login</p>
+      <div className='loginPage'>
+      <div className='heading'>
+      
+        <p>Please create an account</p>
       </div>
       <div className='form'>
         <form onSubmit={onSubmit}>
           <div className='form-group'>
             <input
+              type='text'
+             
+              id='name'
+              name='name'
+              value={name}
+              placeholder='Enter your name'
+              onChange={onChange}
+            />
+          </div>
+          <div className='form-group'>
+            <input
               type='email'
-              className='form-control'
               id='email'
               name='email'
-    
+              value={email}
               placeholder='Enter your email'
               onChange={onChange}
             />
@@ -62,7 +76,6 @@ function Login() {
           <div className='form-group'>
             <input
               type='password'
-              className='form-control'
               id='password'
               name='password'
               value={password}
@@ -71,7 +84,17 @@ function Login() {
             />
           </div>
           <div className='form-group'>
-            <button type='submit' className='btn-block'>
+            <input
+              type='password'
+              id='password2'
+              name='password2'
+              value={password2}
+              placeholder='Confirm password'
+              onChange={onChange}
+            />
+          </div>   
+          <div className='form-group'>
+            <button type='submit' className='btn btn-block'>
               Submit
             </button>
           </div>
@@ -82,4 +105,4 @@ function Login() {
   )
 }
 
-export default Login
+export default Register

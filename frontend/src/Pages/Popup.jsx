@@ -1,5 +1,5 @@
 import React from 'react';
-import {addObj} from './Main.js' ;
+import {addObj} from '../Main.js' ;
 function Popup() {
 
   const onClick = (objType) =>{
