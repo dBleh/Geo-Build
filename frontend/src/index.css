@@ -20,29 +20,53 @@ canvas {
 section {
   position:fixed;
   text-align: center;
+  align-items: center;
   top: 35vh;
   left: 42.5vw;
   width: 30vh;
   height:30vh;
-  background-color: #b82a2a;
+  background-color: #E2D1F9;
   z-index: 1;
   color:rgb(45, 45, 45);
   font-family: sans-serif;
   border-radius: 200px;
 }
 section li{
-  margin-left:0px;
-  margin-top:50px;
-  list-style: none;
+  margin-left:93px;
+}
+.listOne{  
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  margin-top: 45px;
+  margin-left: 60px;
 }
 
+.listTwo{
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  margin-top: 45px;
+  margin-left: -56px;
+}
+
+.listOne li, .listTwo li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  outline: 2px solid rgb(148, 147, 147);
+  width: 100px;
+  height: 50px;
+  margin-top: 15px;
+  border-radius: 40px;
+}
 header {
   position:fixed;
   text-align: center;
   top: 0;
   width: 100%;
-  height:5vh;
-  background-color: #b82a2a;
+  height:5.5vh;
+  background-color: #E2D1F9;
   z-index: 1;
   color:rgb(45, 45, 45);
   font-family: sans-serif;
@@ -57,40 +81,9 @@ li{
   margin-left:10px;
   list-style: none;
 }
-.popup-box {
+h1{
   position: relative;
-  width: 500px;
-  top: -900px;
-  left: 0;
- 
-  pointer-events: all;
-    
-
-  z-index: 2;
+  margin-top: -5px;
+  font-size: 25px;
 }
 
-.arrow-right {
-  position: absolute;
-  top: 36%;
-  left:0;
-  transform: translate(-50%, -50%) rotate(0deg);
-  width: 0;
-  height: 0;
-  border-top: 50px solid transparent;
-  border-bottom: 50px solid transparent;
-  border-left: 300px solid green;
-  outline: 2px solid red;
-}
-
-.arrow-left {
-  position: absolute;
-  top: 36%;
-  left:60%;
-  transform: translate(-50%, -50%) rotate(180deg);
-  width: 0;
-  height: 0;
-  border-top: 50px solid transparent;
-  border-bottom: 50px solid transparent;
-  border-left: 300px solid green;
-  outline: 2px solid red;
-}

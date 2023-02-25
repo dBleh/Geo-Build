@@ -3,7 +3,8 @@ import { DragControls } from 'three/examples/jsm/controls/DragControls'
 import { objIns } from './objectInstantiation'
 import { Vector3 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls';
-import { getIntersectObj, setPosition} from './inAnimation';
+import { getIntersectObj, setPosition } from './inAnimation';
+
 
 // add the PointerLockControls to the scene
 
@@ -24,7 +25,7 @@ var snapObjs = []
 var objs = []
 var isIntersect = false
 var objToSnap = null
-const isVisible = false
+const isVisible = true
 var objHighlighted = null
 var origMat = null
 
@@ -51,8 +52,6 @@ renderer.setClearColor(0x7393B3);
 function onMouseDown(event) {
   if (!eIsdown) {
     if (selectedObject) {
-      console.log(selectedObject)
-
       if ((selectedObject.objType === 'floor' || selectedObject.objType === 'floorT') && objToSnap === null) {
 
         if (selectedObject.obj.position.y < -5 || selectedObject.obj.position.y > 5) {
@@ -298,6 +297,7 @@ function addSnaps(selectedObject) {
       obj: snapObjBack,
       objType: 'floorBackT',
     });
+
   }
   if (selectedObject.objType === 'roofT') {
     // Add snap points to floorT object
@@ -364,12 +364,12 @@ export function addObj(objType) {
   objs.push(t)
   if (selectedObject) {
     scene.remove(selectedObject.obj)
+    objs.pop(selectedObject)
   }
   selectedObject = {
     obj: obj.children[0],
     objType: objType,
   }
-  console.log(obj.children[0].parent)
   scene.add(obj);
 }
 var wIsDown = false
@@ -395,9 +395,23 @@ function onKeyDown(event) {
     wIsDown = true
   }
   if (event.key === "r") {
-    console.log(objHighlighted)
-    if(objHighlighted){
-      scene.remove(objHighlighted.object.parent)
+    if (objHighlighted) {
+      for(var i = 0; i < objs.length; i++){
+        if(objs[i].obj.parent === objHighlighted.object.parent){
+          scene.remove(objHighlighted.object.parent)
+          objs.splice(i, 1);
+          i = i - 1
+        }
+      }
+      for (var j = 0; j < snapObjs.length; j++) {
+        if (snapObjs[j].obj.parent === objHighlighted.object.parent) {
+          scene.remove(snapObjs[j])
+          snapObjs.splice(j, 1);
+          j = j - 1
+        }
+      }
+      objHighlighted = null
+      origMat = null
     }
   }
   if (event.key === "s") {
@@ -407,6 +421,7 @@ function onKeyDown(event) {
     aIsDown = true
   }
   if (event.key === "d") {
+    
     dIsDown = true
   }
   if (event.key === " ") {
@@ -423,7 +438,6 @@ function onKeyUp(event) {
   if (event.key === 'e') {
     eIsdown = false
     lockControls.lock();
-
   }
   if (event.key === 'w') {
     wIsDown = false
@@ -443,39 +457,37 @@ function onKeyUp(event) {
   if (event.key === "x") {
     lControl = false
   }
-
-
 }
 function onMouseMove(event) {
   if (selectedObject && lockControls.isLocked) {
     const deltaY = event.movementX * 0.002
     selectedObject.obj.rotation.y -= deltaY;
     selectedObject.obj.rotation.z = 0;
-  }  if(objs.length > 0 && !selectedObject){
+  } if (objs.length > 0 && !selectedObject) {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     const canvas = document.querySelector('canvas'); // Replace with your canvas element
-  
+
     // Calculate mouse position in normalized device coordinates
     // (-1 to +1) for both components
     mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
     mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
-  
+
     // Set the origin and direction of the raycaster based on the camera and mouse position
     raycaster.setFromCamera(mouse, camera);
     var objInScene = []
-  
-    // Find all objects that intersect with the 
-    for(var i = 0; i < objs.length ;i++){
-      objInScene.push(objs[i].obj)
 
+    // Find all objects that intersect with the 
+    for (var i = 0; i < objs.length; i++) {
+      objInScene.push(objs[i].obj)
     }
     const intersects = raycaster.intersectObjects(objInScene);
-  const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff , wireframe: true });
-  // Return the closest intersected object, or null if there are none
-  if (intersects.length > 0) {
-    // If the intersected object is not already highlighted, highlight it
-    if (intersects[0].object.material !== basicMaterial) {
+
+    const basicMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, wireframe: true });
+    // Return the closest intersected object, or null if there are none
+    if (intersects.length > 0) {
+      // If the intersected object is not already highlighted, highlight it
+
       // If another object was previously highlighted, reset its material to the original material
       if (objHighlighted !== null) {
         objHighlighted.object.material = origMat;
@@ -484,15 +496,16 @@ function onMouseMove(event) {
       objHighlighted = intersects[0];
       origMat = intersects[0].object.material;
       intersects[0].object.material = basicMaterial;
+
+    } else {
+      // If there are no intersections, reset the material of the previously highlighted object (if any)
+      if (objHighlighted !== null) {
+        objHighlighted.object.material = origMat;
+        objHighlighted = null;
+        origMat = null;
+      }
     }
-  } else {
-    // If there are no intersections, reset the material of the previously highlighted object (if any)
-    if (objHighlighted !== null) {
-      objHighlighted.object.material = origMat;
-      objHighlighted = null;
-      origMat = null;
-    }
-  }}
+  }
 }
 
 let time = new Date()
@@ -503,9 +516,9 @@ function animate() {
   time = new Date()
   var deltaTime = time - lastTime
   lastTime = time
-  
 
-  
+
+
 
 
   if (selectedObject) {
@@ -534,7 +547,7 @@ function animate() {
           if (selectedObject.objType === "floor" && objToSnap.objType === "wall") {
           }
           if (selectedObject.objType === "floorT" && objToSnap.objType === "wall") {
-          }if (selectedObject.objType === "roof" && (
+          } if (selectedObject.objType === "roof" && (
             objToSnap.objType === "floorLeft" ||
             objToSnap.objType === "floorRight" ||
             objToSnap.objType === "floorBack" ||
@@ -549,7 +562,7 @@ function animate() {
             isIntersect = true
             selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject, snapRadius))
           }
-          
+
           break
         }
       }
