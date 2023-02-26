@@ -18,10 +18,8 @@ var selectedObject = null
 var cubes = []
 var grid = []
 let isDragging = false;
-
 var snapObjs = []
 var objs = []
-var isIntersect = false
 var objToSnap = null
 const isVisible = true
 var objHighlighted = null
@@ -81,14 +79,14 @@ function onMouseDown(event) {
         if (selectedObject.obj.position.y < -5 || selectedObject.obj.position.y > 5) {
           scene.remove(selectedObject.obj)
           selectedObject = null
-          isIntersect = false
+
           objToSnap = null
         }
       }
       if ((selectedObject.objType === 'wall' && objToSnap === null) || (selectedObject.objType === 'roof' && objToSnap === null)) {
         scene.remove(selectedObject.obj)
         selectedObject = null
-        isIntersect = false
+
         objToSnap = null
 
       }
@@ -97,7 +95,7 @@ function onMouseDown(event) {
       }
 
       selectedObject = null
-      isIntersect = false
+
       objToSnap = null
 
 
@@ -545,7 +543,7 @@ function animate() {
       v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
       snapRadius.position.set(v.x, v.y - 10, v.z)
       if (snapObjs.length === 0) {
-        isIntersect = false
+
         v = camera.getWorldPosition(new THREE.Vector3())
         v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
         selectedObject.obj.position.set(v.x, v.y - 10, v.z)
@@ -557,7 +555,7 @@ function animate() {
 
           if (!intersectedObj) {
             objToSnap = null
-            isIntersect = false
+
             v = camera.getWorldPosition(new THREE.Vector3())
             v.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 13)
             selectedObject.obj.position.set(v.x, v.y - 10, v.z)
@@ -578,7 +576,6 @@ function animate() {
               objToSnap = null
             }
             else {
-              isIntersect = true
               selectedObject.obj.position.copy(setPosition(intersectedObj, selectedObject, snapRadius))
             }
 
@@ -626,14 +623,14 @@ function animate() {
 }
 function stop() {
   selectedObject = null
-  cubes =[]
-  
-  
+  cubes = []
+
+
   snapObjs = []
-  objs =[]
+  objs = []
   objToSnap = []
 
-  
+
   while (scene.children.length > 0) {
     scene.remove(scene.children[0]);
   }

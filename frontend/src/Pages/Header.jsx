@@ -22,7 +22,6 @@ function Header() {
           <li><button className = 'logBtn' type='submit' onClick={onLogout}>Logout</button></li>
           </>
          :<>
-         <li><Link to='/homepage' className="activeLink">WorkSpace</Link></li>
          <li><Link to='/login' className="activeLink">Login</Link></li>
          <li><Link to='/register' className="activeLink">Register</Link></li> 
          </>}

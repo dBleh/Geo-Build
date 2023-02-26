@@ -9,7 +9,6 @@ function HomePage() {
   useEffect(() => {
     animationRef.current = animate();
     return () => {
-
       stop()
     }
   }, []);
