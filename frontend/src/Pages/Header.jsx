@@ -19,6 +19,7 @@ function Header() {
           <> 
           <li><Link to='/homepage' className="activeLink">WorkSpace</Link></li>
           <li><Link to='/savedbuilds' className="activeLink">SavedBuilds</Link></li>
+          <li><Link to='/nworkspace' className="activeLink">nWorkSpace</Link></li>
           <li><button className = 'logBtn' type='submit' onClick={onLogout}>Logout</button></li>
           </>
          :<>

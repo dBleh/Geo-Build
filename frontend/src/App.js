@@ -6,6 +6,7 @@ import HomePage from './Pages/Homepage'
 import Login from './Pages/Login';
 import Register from './Pages/Register';
 import SavedBuilds from './Pages/SavedBuilds';
+import Scene from './Pages/Scene'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path='/login' element={<Login/>} />
           <Route path='/register' element={<Register/>} />
           <Route path='/savedbuilds' element={<SavedBuilds/>} />
+          <Route path='/nworkspace' element={<Scene/>} />
         </Routes>
       </div>
     </Router>
