@@ -1,7 +1,5 @@
 
 import * as THREE from 'three';
-
-
 //returns the object snapRadius is intersecting with, otherwise returns false.
 export function getIntersectObj(object, snapRadius) {
   const bounds = new THREE.Box3().setFromObject(object.obj);
@@ -12,8 +10,8 @@ export function getIntersectObj(object, snapRadius) {
   return false
 }
 
+export function setPosition(objToSnap, selectedObject,snapRadius,) {
 
-export function setPosition(objToSnap, selectedObject,snapRadius) {
   var offset = 0;
   if (selectedObject.objType === 'wall') {
     offset = selectedObject.obj.geometry.parameters.height / 2;
