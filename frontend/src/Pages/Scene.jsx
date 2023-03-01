@@ -4,10 +4,13 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
 import { Vector3 } from 'three';
 import { getIntersectObj, setPosition } from '../SceneHelpers/inAnimation';
-import { objIns } from '../SceneHelpers/objectInstantiation';
-class Scene extends Component {
+import { objIns,addSnaps } from '../SceneHelpers/objectInstantiation';
+import SaveBuild from './saveScene';
+import { connect } from 'react-redux';
+class Scene extends React.Component {
   constructor(props) {
     super(props);
+    
     this.state = {
       mouseX: null,
       mouseY: null,
@@ -38,6 +41,9 @@ class Scene extends Component {
     this.lControl = false
     this.inBound = false
     this.boundMat = null;
+    this.loadedScene = null;
+    this.allObjs= []
+   
 
     this.time = new Date()
     this.lastTime = this.time
@@ -65,7 +71,9 @@ class Scene extends Component {
     this.dragControls = new DragControls(this.cubes, this.camera, this.renderer.domElement);
 
 
-    this.camera.position.z = 5;
+    this.camera.position.y = 20;
+    this.camera.position.z = 10;
+    this.camera.rotation.x = -.5;
     this.scene.add(this.light);
     this.scene.add(this.gridHelper);
     this.animate = this.animate.bind(this);
@@ -73,6 +81,7 @@ class Scene extends Component {
   }
 
   componentDidMount() {
+    
     this.renderer.setClearColor(0xFAF9F6);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -103,6 +112,7 @@ class Scene extends Component {
     document.removeEventListener('keyup', this.handleKeyUp);
     this.mount.removeChild(this.renderer.domElement);
   }
+
 
   handleMouseMove(event) {
 
@@ -183,34 +193,36 @@ class Scene extends Component {
         }
       }
       else {
-        this.addSnaps(this.selectedObject)
+        if(this.selectedObject){
+          var newSnaps = addSnaps(this.selectedObject,this.isVisible)
+          newSnaps.forEach((obj) => {
+            this.snapObjs.push(obj);
+          })
       }
-
+      }
       this.selectedObject = null
-
       this.objToSnap = null
-
-
     }
     if(this.eIsdown){ 
-        for (var i = 0; i < this.objs.length; i++) {
-          if (this.objs[i].obj.parent === this.selectedObject.obj.parent) {
+      if(this.selectedObject){
+        for (var a = 0; a < this.objs.length; a++) {
+          if(this.selectedObject){
+          if (this.objs[a].obj.parent === this.selectedObject.obj.parent) {
             this.scene.remove(this.selectedObject.obj.parent)
-            this.objs.splice(i, 1);
-            i = i - 1
+            this.objs.splice(a, 1);
+            a = a - 1
           }
         }
-        for (var j = 0; j < this.snapObjs.length; j++) {
-          if (this.snapObjs[j].obj.parent === this.selectedObject.obj.parent) {
-            this.scene.remove(this.snapObjs[j])
-            this.snapObjs.splice(j, 1);
-            j = j - 1
+        for (var b = 0; b < this.snapObjs.length; b++) {
+          if (this.snapObjs[b].obj.parent === this.selectedObject.obj.parent) {
+            this.scene.remove(this.snapObjs[b])
+            this.snapObjs.splice(b, 1);
+            b = b - 1
           }
         }
-   
         this.selectedObject = null
-        this.objToSnap = null
-    }
+        this.objToSnap = null}
+    }}
   }
 
   handleKeyDown = (event) => {
@@ -262,9 +274,7 @@ class Scene extends Component {
     if (event.keyCode === 88) {
       this.lControl = true
     }
-
   }
-
   handleKeyUp = (event) => {
     if (event.keyCode === 69) {
       document.getElementById("popup").style.display = "none";
@@ -290,283 +300,48 @@ class Scene extends Component {
       this.lControl = false
     }
   }
-
-
-
-  addSnaps() {
-    const objGeometry = new THREE.BoxGeometry(1, 1, 1);
-    const matT = new THREE.MeshBasicMaterial({ color: 0xf00fff });
-    const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    if (this.selectedObject.objType === 'floor') {
-      // Add snap points to floor object
-      const snapPositions = {
-        right: new THREE.Vector3(5, 2, 0),
-        back: new THREE.Vector3(0, 2, 5),
-        front: new THREE.Vector3(0, 2, - 5),
-        left: new THREE.Vector3(-5, 2, 0),
-      };
-
-      const q = new THREE.Quaternion();
-      q.copy(this.selectedObject.obj.quaternion);
-
-      snapPositions.right.applyQuaternion(q);
-      snapPositions.left.applyQuaternion(q);
-      snapPositions.front.applyQuaternion(q);
-      snapPositions.back.applyQuaternion(q);
-
-      const mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-
-      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
-
-      const snapObjLeft = new THREE.Mesh(objGeometry, mat);
-      snapObjLeft.position.copy(this.selectedObject.obj.position).add(snapPositions.left);
-      snapObjLeft.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjLeft.rotateY(Math.PI / 2)
-      this.selectedObject.obj.parent.add(snapObjLeft);
-      snapObjLeft.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjLeft,
-        objType: 'floorLeft',
-      });
-      const snapObjRight = new THREE.Mesh(objGeometry, mat);
-      snapObjRight.position.copy(this.selectedObject.obj.position).add(snapPositions.right);
-      snapObjRight.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjRight.rotateY(-Math.PI / 2)
-      this.selectedObject.obj.parent.add(snapObjRight);
-      snapObjRight.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjRight,
-        objType: 'floorRight',
-      });
-      const snapObjBack = new THREE.Mesh(objGeometry, matT);
-      snapObjBack.position.copy(this.selectedObject.obj.position).add(snapPositions.back);
-      snapObjBack.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjBack.rotateY(Math.PI)
-      this.selectedObject.obj.parent.add(snapObjBack);
-      snapObjBack.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjBack,
-        objType: 'floorBack',
-      });
-      const snapObjFront = new THREE.Mesh(objGeometry, matT);
-      snapObjFront.position.copy(this.selectedObject.obj.position).add(snapPositions.front);
-      snapObjFront.quaternion.copy(this.selectedObject.obj.quaternion);
-      this.selectedObject.obj.parent.add(snapObjFront);
-      snapObjFront.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjFront,
-        objType: 'floorFront',
-      });
-    }
-    if (this.selectedObject.objType === 'roof') {
-      // Add snap points to floor object
-      const snapPositions = {
-        right: new THREE.Vector3(5, 0, 0),
-        back: new THREE.Vector3(0, 0, 5),
-        front: new THREE.Vector3(0, 0, - 5),
-        left: new THREE.Vector3(-5, 0, 0),
-      };
-
-      const q = new THREE.Quaternion();
-      q.copy(this.selectedObject.obj.quaternion);
-
-      snapPositions.right.applyQuaternion(q);
-      snapPositions.left.applyQuaternion(q);
-      snapPositions.front.applyQuaternion(q);
-      snapPositions.back.applyQuaternion(q);
-
-      const mat = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-
-      const objGeometry = new THREE.BoxGeometry(1, 1, 1);
-
-      const snapObjLeft = new THREE.Mesh(objGeometry, mat);
-      snapObjLeft.position.copy(this.selectedObject.obj.position).add(snapPositions.left);
-      snapObjLeft.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjLeft.rotateY(Math.PI / 2)
-      this.selectedObject.obj.parent.add(snapObjLeft);
-      snapObjLeft.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjLeft,
-        objType: 'roofLeft',
-      });
-      const snapObjRight = new THREE.Mesh(objGeometry, mat);
-      snapObjRight.position.copy(this.selectedObject.obj.position).add(snapPositions.right);
-      snapObjRight.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjRight.rotateY(-Math.PI / 2)
-      this.selectedObject.obj.parent.add(snapObjRight);
-      snapObjRight.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjRight,
-        objType: 'roofRight',
-      });
-      const snapObjBack = new THREE.Mesh(objGeometry, matT);
-      snapObjBack.position.copy(this.selectedObject.obj.position).add(snapPositions.back);
-      snapObjBack.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjBack.rotateY(Math.PI)
-      this.selectedObject.obj.parent.add(snapObjBack);
-      snapObjBack.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjBack,
-        objType: 'roofBack',
-      });
-      const snapObjFront = new THREE.Mesh(objGeometry, matT);
-      snapObjFront.position.copy(this.selectedObject.obj.position).add(snapPositions.front);
-      snapObjFront.quaternion.copy(this.selectedObject.obj.quaternion);
-      this.selectedObject.obj.parent.add(snapObjFront);
-      snapObjFront.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjFront,
-        objType: 'roofFront',
-      });
-    }
-    if (this.selectedObject.objType === 'wall') {
-      // Add snap point to wall object
-      const snapPos = new THREE.Vector3(0, 5, 0);
-      const snapObj = new THREE.Mesh(objGeometry, mat);
-      snapPos.applyQuaternion(this.selectedObject.obj.quaternion);
-      snapObj.position.copy(this.selectedObject.obj.position).add(snapPos);
-      snapObj.quaternion.copy(this.selectedObject.obj.quaternion);
-      this.selectedObject.obj.parent.add(snapObj);
-      snapObj.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObj,
-        objType: 'wall',
-      });
-    }
-    if (this.selectedObject.objType === 'door') {
-      // Add snap point to wall object
-      const snapPos = new THREE.Vector3(0, 5, 0);
-      const snapObj = new THREE.Mesh(objGeometry, mat);
-      snapPos.applyQuaternion(this.selectedObject.obj.quaternion);
-      snapObj.position.copy(this.selectedObject.obj.position).add(snapPos);
-      snapObj.quaternion.copy(this.selectedObject.obj.quaternion);
-      this.selectedObject.obj.parent.add(snapObj);
-      snapObj.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObj,
-        objType: 'door',
-      });
-    }
-    if (this.selectedObject.objType === 'floorT') {
-      // Add snap points to floorT object
-      const snapPositions = {
-        back: new THREE.Vector3(0, 4.5, 0),
-        right: new THREE.Vector3(-4.33013, 4.5, -2.5),
-        left: new THREE.Vector3(-4.33013, 4.5, 2.5),
-      };
-      // Rotate snap positions based on object orientation
-      snapPositions.right.applyQuaternion(this.selectedObject.obj.quaternion);
-      snapPositions.left.applyQuaternion(this.selectedObject.obj.quaternion);
-      snapPositions.back.applyQuaternion(this.selectedObject.obj.quaternion);
-      // Define the dimensions of the squares
-      // Define the geometry for the squares
-      const squareGeometry = new THREE.BoxGeometry(1, 1, 1);
-      // Create the square meshes and add them to the scene
-      const snapObjLeft = new THREE.Mesh(squareGeometry, mat);
-      snapObjLeft.position.copy(this.selectedObject.obj.position).add(snapPositions.left);
-      snapObjLeft.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjLeft.rotateY(1.0472 + Math.PI / 2);
-      this.selectedObject.obj.parent.add(snapObjLeft);
-      snapObjLeft.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjLeft,
-        objType: 'floorLeftT',
-      });
-      const snapObjRight = new THREE.Mesh(objGeometry, mat);
-      snapObjRight.position.copy(this.selectedObject.obj.position).add(snapPositions.right);
-      snapObjRight.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjRight.rotateY(-1.0472 + Math.PI / 2);
-      // Get the inverse of the snap object's world matrix
-      const snapWorldInverse = new THREE.Matrix4();
-      snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
-      // Transform the position of the new object by the inverse of the snap object's world matrix
-      this.selectedObject.obj.parent.add(snapObjRight);
-      snapObjRight.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjRight,
-        objType: 'floorRightT',
-      });
-      const snapObjBack = new THREE.Mesh(squareGeometry, mat);
-      snapObjBack.position.copy(this.selectedObject.obj.position).add(snapPositions.back);
-      snapObjBack.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjBack.rotateY(-Math.PI / 2)
-      this.selectedObject.obj.parent.add(snapObjBack);
-      snapObjBack.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjBack,
-        objType: 'floorBackT',
-      });
-
-    }
-    if (this.selectedObject.objType === 'roofT') {
-      // Add snap points to floorT object
-      const snapPositions = {
-        back: new THREE.Vector3(0, .1, 0),
-        right: new THREE.Vector3(-4.33013, .1, -2.5),
-        left: new THREE.Vector3(-4.33013, .1, 2.5),
-      };
-      // Rotate snap positions based on object orientation
-      snapPositions.right.applyQuaternion(this.selectedObject.obj.quaternion);
-      snapPositions.left.applyQuaternion(this.selectedObject.obj.quaternion);
-      snapPositions.back.applyQuaternion(this.selectedObject.obj.quaternion);
-      // Define the dimensions of the squares
-      // Define the geometry for the squares
-      const squareGeometry = new THREE.BoxGeometry(1, 1, 1);
-      // Create the square meshes and add them to the scene
-      const snapObjLeft = new THREE.Mesh(squareGeometry, mat);
-      snapObjLeft.position.copy(this.selectedObject.obj.position).add(snapPositions.left);
-      snapObjLeft.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjLeft.rotateY(1.0472 + Math.PI / 2);
-      this.selectedObject.obj.parent.add(snapObjLeft);
-      snapObjLeft.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjLeft,
-        objType: 'roofLeftT',
-      });
-      const snapObjRight = new THREE.Mesh(objGeometry, mat);
-      snapObjRight.position.copy(this.selectedObject.obj.position).add(snapPositions.right);
-      snapObjRight.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjRight.rotateY(-1.0472 + Math.PI / 2);
-      // Get the inverse of the snap object's world matrix
-      const snapWorldInverse = new THREE.Matrix4();
-      snapWorldInverse.copy(snapObjRight.matrixWorld).invert();
-      // Transform the position of the new object by the inverse of the snap object's world matrix
-      this.selectedObject.obj.parent.add(snapObjRight);
-      snapObjRight.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjRight,
-        objType: 'roofRightT',
-      });
-      const snapObjBack = new THREE.Mesh(squareGeometry, mat);
-      snapObjBack.position.copy(this.selectedObject.obj.position).add(snapPositions.back);
-      snapObjBack.quaternion.copy(this.selectedObject.obj.quaternion);
-      snapObjBack.rotateY(-Math.PI / 2)
-      this.selectedObject.obj.parent.add(snapObjBack);
-      snapObjBack.visible = this.isVisible
-      this.snapObjs.push({
-        obj: snapObjBack,
-        objType: 'roofBackT',
-      });
-    }
-
-  }
-
-
-
   animate() {
-
-
+    if (this.loadedScene && this.loadedScene.objs) {
+      console.log(this.loadedScene)
+    
+      for (var i = 0; i < this.loadedScene.objs[0].length; i++) {
+        var pos = new THREE.Vector3(
+          this.loadedScene.objs[0][i].position.x,
+          this.loadedScene.objs[0][i].position.y,
+          this.loadedScene.objs[0][i].position.z
+        );
+        
+        var newObj = objIns(pos, this.loadedScene.objs[0][i].objType);
+        const t = {
+          obj: newObj.children[0],
+          objType: this.loadedScene.objs[0][i].objType,
+        };
+    
+        t.obj.rotation.copy(this.loadedScene.objs[0][i].rotation);
+    
+        this.objs.push(t);
+    
+        var newSnaps = addSnaps(t, this.isVisible);
+        if (newSnaps) {
+          newSnaps.forEach((obj) => {
+            this.snapObjs.push(obj);
+          });
+        }
+    
+        this.scene.add(newObj);
+      }
+    
+      this.loadedScene = null;
+    }
     this.time = new Date()
     var deltaTime = this.time - this.lastTime
     this.lastTime = this.time
     if (this.selectedObject) {
-
       var v = this.camera.getWorldPosition(new THREE.Vector3())
       v = this.camera.getWorldPosition(new THREE.Vector3())
       v.addScaledVector(this.camera.getWorldDirection(new THREE.Vector3()), 13)
       this.snapRadius.position.set(v.x, v.y - 10, v.z)
       if (this.snapObjs.length === 0) {
-
         v = this.camera.getWorldPosition(new THREE.Vector3())
         v.addScaledVector(this.camera.getWorldDirection(new THREE.Vector3()), 13)
         this.selectedObject.obj.position.set(v.x, v.y - 10, v.z)
@@ -575,10 +350,8 @@ class Scene extends Component {
         for (let i = 0; i < this.snapObjs.length; i++) {
           this.objToSnap = this.snapObjs[i]
           const intersectedObj = getIntersectObj(this.snapObjs[i], this.snapRadius)
-
           if (!intersectedObj) {
             this.objToSnap = null
-
             v = this.camera.getWorldPosition(new THREE.Vector3())
             v.addScaledVector(this.camera.getWorldDirection(new THREE.Vector3()), 13)
             this.selectedObject.obj.position.set(v.x, v.y - 10, v.z)
@@ -599,7 +372,12 @@ class Scene extends Component {
               this.objToSnap = null
             }
             else {
-              this.selectedObject.obj.position.copy(setPosition(intersectedObj, this.selectedObject, this.snapRadius))
+              const newPos = setPosition(intersectedObj, this.selectedObject, this.snapRadius,this.objs)
+              if(!newPos){
+              this.selectedObject.obj.position.set(v.x, v.y - 10, v.z)}
+              else{
+              this.selectedObject.obj.position.copy(setPosition(intersectedObj, this.selectedObject, this.snapRadius,this.objs))
+            }
             }
 
             break
@@ -617,7 +395,6 @@ class Scene extends Component {
           this.boundMat = this.selectedObject.obj.material;
         }
       }
-      
       // Check the bounds and set the color
       if (this.selectedObject.objType === 'floor' || this.selectedObject.objType === 'floorT') {
         if (this.selectedObject.obj.position.y < -5 || this.selectedObject.obj.position.y > 5) {
@@ -663,13 +440,16 @@ class Scene extends Component {
     if (this.lControl) {
       this.camera.translateY(-.01 * deltaTime)
     }
-
-
     this.renderScene();
     this.frameId = window.requestAnimationFrame(this.animate);
   }
   onClick = (objType) => {
     this.addObj(objType)
+    this.scene.traverse((object) => {
+      if (object instanceof THREE.Object3D) {
+        this.allObjs.push(object);
+      }
+    });
   }
   renderScene() {
     this.renderer.render(this.scene, this.camera);
@@ -687,7 +467,6 @@ class Scene extends Component {
     }
     this.objs.push(t)
     if (this.selectedObject) {
-
       this.scene.remove(this.selectedObject.obj)
       this.objs.pop(this.selectedObject)
     }
@@ -699,6 +478,8 @@ class Scene extends Component {
   }
 
   render() {
+    const { sceneObjs } = this.props;
+      this.loadedScene = sceneObjs; 
     return (
       <>
         <div
@@ -706,8 +487,10 @@ class Scene extends Component {
             this.mount = mount;
           }}
         />
-
-        <div id="popup">
+    <div id="saveScene">
+    <SaveBuild myProp= {this.objs} />
+      </div>
+        <div id="popup">      
           <li onClick={() => this.onClick("wall")}>Wall</li>
           <li onClick={() => this.onClick("floorT")}>Triangle Foundation</li>
           <li onClick={() => this.onClick("floor")}>Square Foundation</li>
@@ -715,11 +498,15 @@ class Scene extends Component {
           <li onClick={() => this.onClick("roofT")}>Triangle Roof</li>
           <li onClick={() => this.onClick("door")}>Door</li>
         </div>
-
-
       </>
     );
   }
 }
+const mapStateToProps = state => {
+  return {
+    sceneObjs: state.auth.sceneObjs,
+  };
+};
 
-export default Scene;
+
+export default connect(mapStateToProps)(Scene);

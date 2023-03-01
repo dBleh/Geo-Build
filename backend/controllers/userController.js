@@ -2,12 +2,45 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
+const sceneModel = require('../models/sceneModel')
+const sceneNamesModel =require('../models/sceneNamesModel')
 
-// @desc    Register new user
-// @route   POST /api/users
-// @access  Public
+const getScene = asyncHandler(async (req, res) => {
+  const name = req.query.sName;
+  const userId = req.query.userId;
+  const scene = await sceneModel.findOne({ sceneName: name, userId: userId });
+  if (!scene) {
+    res.status(404).json({ message: "Scene not found" });
+    return;
+  }
+
+  res.json(scene);
+});
+const sceneNames = asyncHandler(async (req, res) => {
+  const userId = req.query.userId
+  const scenes = await sceneModel.find({userId: userId})
+  const sceneNames = scenes.map(scene => scene.sceneName)
+  res.json(sceneNames)
+})
+const saveScene = asyncHandler(async (req, res) => {
+  const { userId, objs, sceneName } = req.body
+  const scene = await sceneModel.findOne({ sceneName: sceneName, userId: userId });
+  
+  if(!scene){
+    const newScene = await sceneModel.create({
+      userId,
+      sceneName,
+      objs: [objs],
+    });
+    res.status(200).json(newScene);
+  }
+  else{
+    res.status(200).json("scene with this name already exists");
+  }
+})
+
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password} = req.body
+  const { name, email, password } = req.body
   if (!name || !email || !password) {
     res.status(400)
     throw new Error('Please add all fields')
@@ -46,24 +79,22 @@ const registerUser = asyncHandler(async (req, res) => {
 // @access  Public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password, userType } = req.body
+  // Check for user email
+  const user = await User.findOne({ email })
 
-  
-    // Check for user email
-    const user = await User.findOne({ email })
+  if (user && (await bcrypt.compare(password, user.password))) {
+    res.json({
+      _id: user.id,
+      name: user.name,
+      email: user.email,
+      userType: user.userType,
+      token: generateToken(user._id),
+    })
+  } else {
+    res.status(400)
+    throw new Error('Invalid credentials')
+  }
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      res.json({
-        _id: user.id,
-        name: user.name,
-        email: user.email,
-        userType: user.userType,
-        token: generateToken(user._id),
-      })
-    } else {
-      res.status(400)
-      throw new Error('Invalid credentials')
-    }
-  
 })
 
 // @desc    Get user data
@@ -81,6 +112,9 @@ const generateToken = (id) => {
 }
 
 module.exports = {
+  getScene,
+  sceneNames,
+  saveScene,
   registerUser,
   loginUser,
   getMe,

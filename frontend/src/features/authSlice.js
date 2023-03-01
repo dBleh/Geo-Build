@@ -7,12 +7,63 @@ const user = JSON.parse(localStorage.getItem('user'))
 
 const initialState = {
   user: user ? user : null,
+  sceneTitles: null,
+  sceneObjs: [],
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: '',
 }
 
+export const getScene = createAsyncThunk(
+  'auth/getscene',
+  async(getReq,thunkAPI) => {
+    try {
+      return await authService.getScene(getReq)
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString()
+      return thunkAPI.rejectWithValue(message)
+    }
+  }
+)
+export const sceneNames = createAsyncThunk(
+  'auth/scenenames',
+  async(userId, thunkAPI) => {
+    try {
+      return await authService.sceneNames(userId)
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString()
+      return thunkAPI.rejectWithValue(message)
+    }
+  }
+)
+export const saveScene = createAsyncThunk(
+  'auth/savescene',
+  async(objs, thunkAPI) => {
+    try {
+      return await authService.saveScene(objs)
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString()
+        console.log(message)
+      return thunkAPI.rejectWithValue(message)
+    }
+  }
+)
 // Register User
 export const register = createAsyncThunk(
   'auth/register',
@@ -26,7 +77,6 @@ export const register = createAsyncThunk(
           error.response.data.message) ||
         error.message ||
         error.toString()
-        console.log(message)
       return thunkAPI.rejectWithValue(message)
     }
   }
@@ -41,7 +91,6 @@ export const login = createAsyncThunk(
       (error.response && error.response.data && error.response.data.message) ||
       error.message ||
       error.toString()
-      console.log(message)
     return thunkAPI.rejectWithValue(message)
   }
 })
@@ -94,7 +143,35 @@ export const authSlice = createSlice({
       })
       .addCase(logout.fulfilled, (state) => {
         state.user = null
-      })  
+      }) 
+      .addCase(sceneNames.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(sceneNames.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.isSuccess = true
+        state.sceneTitles = action.payload
+      })
+      .addCase(sceneNames.rejected, (state, action) => {
+        state.isLoading = false
+        state.isError = true
+        state.message = action.payload
+        state.sceneTitles = null
+      }) 
+      .addCase(getScene.pending, (state) => {
+        state.isLoading = true
+      })
+      .addCase(getScene.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.isSuccess = true
+        state.sceneObjs = action.payload
+      })
+      .addCase(getScene.rejected, (state, action) => {
+        state.isLoading = false
+        state.isError = true
+        state.message = action.payload
+        state.sceneObjs = null
+      }) 
   },
 })
 
