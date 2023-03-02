@@ -48,7 +48,7 @@ function Register() {
       <div className='loginPage'>
       <div className='heading'>
       
-        <p>Please create an account</p>
+        <p>Create account</p>
       </div>
       <div className='form'>
         <form onSubmit={onSubmit}>

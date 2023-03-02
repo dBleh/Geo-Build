@@ -41,16 +41,17 @@ function SaveBuild(props) {
 
     dispatch(saveScene(sModel));
   }
-
+  
   return (
-    <div>
+    
+   <div>
        <form onSubmit={onSubmit}>
        <input
               type='sceneName'
               className='form-control'
               id='sceneName'
               name='sceneName'
-              placeholder='Enter your sceneName'
+              placeholder='Enter a name for the scene'
               onChange={onChange}
             />
       <button type='submit' className='btn-block'>

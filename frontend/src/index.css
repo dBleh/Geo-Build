@@ -11,32 +11,35 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
 canvas {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 0;
 }
+
 section {
-  position:fixed;
+  position: fixed;
   text-align: center;
   align-items: center;
   top: 35vh;
   left: 42.5vw;
   width: 30vh;
-  height:30vh;
+  height: 30vh;
   background-color: #E2D1F9;
   z-index: 1;
-  color:rgb(45, 45, 45);
+  color: rgb(45, 45, 45);
   font-family: sans-serif;
   border-radius: 200px;
   display: none;
 }
 
-section li{
-  margin-left:93px;
+section li {
+  margin-left: 93px;
 }
-.loginPage{
+
+.loginPage {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -44,6 +47,15 @@ section li{
   width: 100vw;
   height: 100vh;
 }
+.homePage{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #8AAAE5;
+  width: 100vw;
+  height: 100vh;
+}
+
 .heading {
   font-size: 2rem;
   font-weight: 8000;
@@ -52,12 +64,14 @@ section li{
   color: rgb(20, 18, 19);
   border-radius: 200px;
 }
-.logBtn{
-  background-color:#8AAAE5 ;
-  margin-left:50vw ;
+
+.logBtn {
+  background-color: #8AAAE5;
   border: 1px solid #000000;
+  margin-top: 20px;
 
 }
+
 .activeLink {
   display: flex;
   margin-top: 3px;
@@ -65,6 +79,7 @@ section li{
   color: rgb(56, 56, 56);
   text-decoration: none;
 }
+
 .form-group input,
 .form-group textarea,
 .form-group select {
@@ -75,7 +90,8 @@ section li{
   margin-bottom: 10px;
   font-family: inherit;
 }
-.listOne{  
+
+.listOne {
   position: absolute;
   justify-content: center;
   align-items: center;
@@ -83,7 +99,7 @@ section li{
   margin-left: 60px;
 }
 
-.listTwo{
+.listTwo {
   position: absolute;
   justify-content: center;
   align-items: center;
@@ -91,7 +107,8 @@ section li{
   margin-left: -56px;
 }
 
-.listOne li, .listTwo li {
+.listOne li,
+.listTwo li {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -101,28 +118,32 @@ section li{
   margin-top: 15px;
   border-radius: 40px;
 }
+
 header {
-  position:fixed;
+  position: fixed;
   text-align: center;
   top: 0;
   width: 100%;
-  height:5.5vh;
+  height: 5.5vh;
   background-color: #EA738DFF;
   z-index: 1;
-  color:rgb(45, 45, 45);
+  color: rgb(45, 45, 45);
   font-family: sans-serif;
 }
+
 ul {
   display: flex;
-  flex-direction:  row;
-  
+  flex-direction: row;
+
   list-style: none;
 }
-li{
-  margin-left:10px;
+
+li {
+  margin-left: 10px;
   list-style: none;
 }
-h1{
+
+h1 {
   position: relative;
   margin-top: 1px;
   font-size: 20px;
@@ -131,7 +152,7 @@ h1{
 #popup {
   position: fixed;
   height: 200px;
-  width:200px;
+  width: 200px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -142,10 +163,27 @@ h1{
 }
 
 #saveScene {
-  position:fixed;
+  display: none;
+}
+
+#instructions {
+  position: absolute;
+  display: flex;
+  right: 35vw;
+  top: 25vh;
+  background-color: #FFFFFF;
+  display: none;
+  width: 300px;
+  height: 400px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.savedScenes {
+  position: fixed;
   text-align: center;
   height: 80px;
-  width:200px;
+  width: 200px;
   top: 12%;
   left: 6.5%;
   transform: translate(-50%, -50%);
@@ -154,15 +192,25 @@ h1{
   padding: 10px;
 }
 
-.savedScenes{
-  position:fixed;
+
+#dropdown {
+  position: fixed;
   text-align: center;
-  height: 80px;
-  width:200px;
-  top: 12%;
-  left: 6.5%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border: 1px solid black;
+  height: 20px;
+  width: 100px;
+  top: 5%;
+  right: 100px;
   padding: 10px;
+
+}
+
+.accountDropDown {
+  position: fixed;
+  right: 5px
+}
+
+#checkBox {
+  position: fixed;
+  right: 70px;
+  width: 150px
 }

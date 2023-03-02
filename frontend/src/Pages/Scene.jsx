@@ -4,13 +4,13 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
 import { Vector3 } from 'three';
 import { getIntersectObj, setPosition } from '../SceneHelpers/inAnimation';
-import { objIns,addSnaps } from '../SceneHelpers/objectInstantiation';
+import { objIns, addSnaps } from '../SceneHelpers/objectInstantiation';
 import SaveBuild from './saveScene';
 import { connect } from 'react-redux';
 class Scene extends React.Component {
   constructor(props) {
     super(props);
-    
+
     this.state = {
       mouseX: null,
       mouseY: null,
@@ -28,7 +28,7 @@ class Scene extends React.Component {
     this.snapObjs = [];
     this.objs = [];
     this.objToSnap = null;
-    this.isVisible = true;
+    this.isVisible = false;
     this.objHighlighted = null;
     this.origMat = null;
     this.isStarted = false;
@@ -42,8 +42,8 @@ class Scene extends React.Component {
     this.inBound = false
     this.boundMat = null;
     this.loadedScene = null;
-    this.allObjs= []
-   
+    this.allObjs = []
+
 
     this.time = new Date()
     this.lastTime = this.time
@@ -81,7 +81,7 @@ class Scene extends React.Component {
   }
 
   componentDidMount() {
-    
+
     this.renderer.setClearColor(0xFAF9F6);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -193,42 +193,44 @@ class Scene extends React.Component {
         }
       }
       else {
-        if(this.selectedObject){
-          var newSnaps = addSnaps(this.selectedObject,this.isVisible)
+        if (this.selectedObject) {
+          var newSnaps = addSnaps(this.selectedObject, this.isVisible)
           newSnaps.forEach((obj) => {
             this.snapObjs.push(obj);
           })
-      }
+        }
       }
       this.selectedObject = null
       this.objToSnap = null
     }
-    if(this.eIsdown){ 
-      if(this.selectedObject){
+    if (this.eIsdown) {
+      if (this.selectedObject) {
         for (var a = 0; a < this.objs.length; a++) {
-          if(this.selectedObject){
-          if (this.objs[a].obj.parent === this.selectedObject.obj.parent) {
-            this.scene.remove(this.selectedObject.obj.parent)
-            this.objs.splice(a, 1);
-            a = a - 1
+          if (this.selectedObject) {
+            if (this.objs[a].obj.parent === this.selectedObject.obj.parent) {
+              this.scene.remove(this.selectedObject.obj.parent)
+              this.objs.splice(a, 1);
+              a = a - 1
+            }
           }
-        }
-        for (var b = 0; b < this.snapObjs.length; b++) {
-          if (this.snapObjs[b].obj.parent === this.selectedObject.obj.parent) {
-            this.scene.remove(this.snapObjs[b])
-            this.snapObjs.splice(b, 1);
-            b = b - 1
+          for (var b = 0; b < this.snapObjs.length; b++) {
+            if (this.snapObjs[b].obj.parent === this.selectedObject.obj.parent) {
+              this.scene.remove(this.snapObjs[b])
+              this.snapObjs.splice(b, 1);
+              b = b - 1
+            }
           }
+          this.selectedObject = null
+          this.objToSnap = null
         }
-        this.selectedObject = null
-        this.objToSnap = null}
-    }}
+      }
+    }
   }
 
   handleKeyDown = (event) => {
 
     if (event.keyCode === 69) {
-      
+
       this.eIsdown = true
       document.getElementById("popup").style.display = "block";
       this.lockControls.unlock();
@@ -300,37 +302,38 @@ class Scene extends React.Component {
       this.lControl = false
     }
   }
+  loadScene() {
+    for (var i = 0; i < this.loadedScene.objs[0].length; i++) {
+      var pos = new THREE.Vector3(
+        this.loadedScene.objs[0][i].position.x,
+        this.loadedScene.objs[0][i].position.y,
+        this.loadedScene.objs[0][i].position.z
+      );
+
+      var newObj = objIns(pos, this.loadedScene.objs[0][i].objType);
+      const t = {
+        obj: newObj.children[0],
+        objType: this.loadedScene.objs[0][i].objType,
+      };
+
+      t.obj.rotation.copy(this.loadedScene.objs[0][i].rotation);
+
+      this.objs.push(t);
+
+      var newSnaps = addSnaps(t, this.isVisible);
+      if (newSnaps) {
+        newSnaps.forEach((obj) => {
+          this.snapObjs.push(obj);
+        });
+      }
+
+      this.scene.add(newObj);
+    }
+
+  }
   animate() {
     if (this.loadedScene && this.loadedScene.objs) {
-      console.log(this.loadedScene)
-    
-      for (var i = 0; i < this.loadedScene.objs[0].length; i++) {
-        var pos = new THREE.Vector3(
-          this.loadedScene.objs[0][i].position.x,
-          this.loadedScene.objs[0][i].position.y,
-          this.loadedScene.objs[0][i].position.z
-        );
-        
-        var newObj = objIns(pos, this.loadedScene.objs[0][i].objType);
-        const t = {
-          obj: newObj.children[0],
-          objType: this.loadedScene.objs[0][i].objType,
-        };
-    
-        t.obj.rotation.copy(this.loadedScene.objs[0][i].rotation);
-    
-        this.objs.push(t);
-    
-        var newSnaps = addSnaps(t, this.isVisible);
-        if (newSnaps) {
-          newSnaps.forEach((obj) => {
-            this.snapObjs.push(obj);
-          });
-        }
-    
-        this.scene.add(newObj);
-      }
-    
+      this.loadScene()
       this.loadedScene = null;
     }
     this.time = new Date()
@@ -372,12 +375,13 @@ class Scene extends React.Component {
               this.objToSnap = null
             }
             else {
-              const newPos = setPosition(intersectedObj, this.selectedObject, this.snapRadius,this.objs)
-              if(!newPos){
-              this.selectedObject.obj.position.set(v.x, v.y - 10, v.z)}
-              else{
-              this.selectedObject.obj.position.copy(setPosition(intersectedObj, this.selectedObject, this.snapRadius,this.objs))
-            }
+              const newPos = setPosition(intersectedObj, this.selectedObject, this.snapRadius, this.objs)
+              if (!newPos) {
+                this.selectedObject.obj.position.set(v.x, v.y - 10, v.z)
+              }
+              else {
+                this.selectedObject.obj.position.copy(setPosition(intersectedObj, this.selectedObject, this.snapRadius, this.objs))
+              }
             }
 
             break
@@ -390,7 +394,7 @@ class Scene extends React.Component {
     if (this.selectedObject) {
       // Check the object type and set the original material if necessary
       if (this.selectedObject.objType === 'floor' || this.selectedObject.objType === 'floorT' ||
-          this.selectedObject.objType === 'wall' || this.selectedObject.objType === 'door') {
+        this.selectedObject.objType === 'wall' || this.selectedObject.objType === 'door') {
         if (this.boundMat === null) {
           this.boundMat = this.selectedObject.obj.material;
         }
@@ -416,7 +420,7 @@ class Scene extends React.Component {
         }
       }
     }
-    
+
     if (!this.isDragging) {
       this.snapRadius.visible = false
     }
@@ -479,7 +483,20 @@ class Scene extends React.Component {
 
   render() {
     const { sceneObjs } = this.props;
-      this.loadedScene = sceneObjs; 
+    this.loadedScene = sceneObjs;
+    const dropDown = (e) => {
+      document.getElementById(e).style.display === "block" ? document.getElementById(e).style.display = "none" : document.getElementById(e).style.display = "block";
+    }
+    const checkBoxes = (e) => {
+      this.isVisible = !this.isVisible
+      if(e === 'snapBoxes'){
+       
+        this.snapObjs.forEach((obj) => {
+          obj.obj.visible = this.isVisible
+        })
+        
+      }
+    }
     return (
       <>
         <div
@@ -487,10 +504,35 @@ class Scene extends React.Component {
             this.mount = mount;
           }}
         />
-    <div id="saveScene">
-    <SaveBuild myProp= {this.objs} />
-      </div>
-        <div id="popup">      
+        <div id="dropdown">
+          <div onClick={() => dropDown('saveScene')} >Save Scene ↓</div>
+          <div id='saveScene'>
+            <SaveBuild myProp={this.objs} />
+          </div>
+          <br></br>
+          <div onClick={() => dropDown('instructions')} >Instructions ↓</div>
+          <div id='instructions'>
+            <li>Movement</li>
+            <li>- To move use WASD</li>
+            <li>- Hold spacebar to move up</li>
+            <li>- Hold x to move down</li>
+            <br></br>
+            <li>Getting Started</li>
+            <li>- Hold E to show complete object list</li>
+            <li>- Click on object name to add it to scene</li>
+            <li>- After selecting object to add to the scene the object will move around the scene in front of you until placed</li>
+            <li>- Foundation objects can be placed without another object in the scene</li>
+            <li>- All objects other than foundations must snap to another object</li>
+            <li>- Ceilings can not snap to foundations</li>
+            <li>- To remove an object from the scene look towards desired object until it becomes transparent then press 'r'</li>
+          
+          </div>
+          <br></br>
+          <div id="checkBox">
+            <div onClick={() => checkBoxes('snapBoxes')}>Show snap points</div>
+          </div>
+        </div>
+        <div id="popup">
           <li onClick={() => this.onClick("wall")}>Wall</li>
           <li onClick={() => this.onClick("floorT")}>Triangle Foundation</li>
           <li onClick={() => this.onClick("floor")}>Square Foundation</li>

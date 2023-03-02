@@ -5,7 +5,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import HomePage from './Pages/Homepage'
 import Login from './Pages/Login';
 import Register from './Pages/Register';
-import SavedBuilds from './Pages/SavedBuilds.jsx';
+import SavedBuilds from './Pages/Components/SavedBuilds.jsx';
 import Scene from './Pages/Scene'
 
 function App() {
