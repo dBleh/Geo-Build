@@ -332,6 +332,7 @@ class Scene extends React.Component {
 
   }
   animate() {
+  
     if (this.loadedScene && this.loadedScene.objs) {
       this.loadScene()
       this.loadedScene = null;
@@ -340,6 +341,11 @@ class Scene extends React.Component {
     var deltaTime = this.time - this.lastTime
     this.lastTime = this.time
     if (this.selectedObject) {
+      
+      
+
+      
+      
       var v = this.camera.getWorldPosition(new THREE.Vector3())
       v = this.camera.getWorldPosition(new THREE.Vector3())
       v.addScaledVector(this.camera.getWorldDirection(new THREE.Vector3()), 13)
@@ -454,6 +460,7 @@ class Scene extends React.Component {
         this.allObjs.push(object);
       }
     });
+    
   }
   renderScene() {
     this.renderer.render(this.scene, this.camera);
@@ -479,6 +486,30 @@ class Scene extends React.Component {
       objType: objType,
     }
     this.scene.add(obj);
+    if (this.selectedObject) {
+      const objGeometry = new THREE.BoxGeometry(1, 1, 1)
+      const material = new THREE.MeshBasicMaterial({ color: 0x000000})
+      
+      var edgesGeometry = new THREE.EdgesGeometry(this.selectedObject.obj.geometry);
+  
+      // Get an array of vertices from the edges geometry
+      var vertices = edgesGeometry.attributes.position.array;
+  
+      // Loop through the vertices array two at a time
+      for (var i = 0; i < vertices.length; i += 6) {
+        // Get the positions of the two vertices that make up the edge
+        var vertex1 = new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
+        var vertex2 = new THREE.Vector3(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
+  
+        // Compute the midpoint of the two vertices
+        var midpoint = new THREE.Vector3().addVectors(vertex1, vertex2).multiplyScalar(0.5);
+        const obj = new THREE.Mesh(objGeometry, material);
+        obj.position.set(midpoint.x,midpoint.y+5,midpoint.z);
+        this.scene.add(obj)
+        
+        // Print the position of the midpoint
+      }
+    }
   }
 
   render() {
@@ -504,14 +535,22 @@ class Scene extends React.Component {
             this.mount = mount;
           }}
         />
-        <div id="dropdown">
-          <div onClick={() => dropDown('saveScene')} >Save Scene ↓</div>
+        <div  id="dropdown">
+          <div id="checkBox" onClick={() => dropDown('saveScene')} >Save Scene ↓</div>
           <div id='saveScene'>
             <SaveBuild myProp={this.objs} />
           </div>
           <br></br>
-          <div onClick={() => dropDown('instructions')} >Instructions ↓</div>
-          <div id='instructions'>
+          <br></br>
+          
+          <div id="checkBox" onClick={() => dropDown('instructions')} >Instructions ↓</div>
+          <br></br>
+          <br></br>
+          <div id="checkBox">
+            <div onClick={() => checkBoxes('snapBoxes')}>Show snap points</div>
+          </div>
+        </div>
+        <div id='instructions'>
             <li>Movement</li>
             <li>- To move use WASD</li>
             <li>- Hold spacebar to move up</li>
@@ -524,14 +563,8 @@ class Scene extends React.Component {
             <li>- Foundation objects can be placed without another object in the scene</li>
             <li>- All objects other than foundations must snap to another object</li>
             <li>- Ceilings can not snap to foundations</li>
-            <li>- To remove an object from the scene look towards desired object until it becomes transparent then press 'r'</li>
-          
+            <li>- To remove an object from the scene look towards desired object until it becomes transparent then press 'r'</li> 
           </div>
-          <br></br>
-          <div id="checkBox">
-            <div onClick={() => checkBoxes('snapBoxes')}>Show snap points</div>
-          </div>
-        </div>
         <div id="popup">
           <li onClick={() => this.onClick("wall")}>Wall</li>
           <li onClick={() => this.onClick("floorT")}>Triangle Foundation</li>

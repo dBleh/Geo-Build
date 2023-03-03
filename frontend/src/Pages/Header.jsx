@@ -8,14 +8,14 @@ function Header() {
     (state) => state.auth
   )
   const navigate = useNavigate()
-  var [accInfo,setAccountInfo] = useState(false)
+  var [accInfo, setAccountInfo] = useState(false)
   const dispatch = useDispatch()
   const onLogout = () => {
     dispatch(logout())
     navigate('/homepage')
   }
   const onClick = () => {
-   setAccountInfo(!accInfo)
+    setAccountInfo(!accInfo)
   }
   return (
     <header>
@@ -29,10 +29,16 @@ function Header() {
               <li>
                 <div className='accountDropDown' onClick={onClick}>
                   <li>{(user.name[0]).toUpperCase()}</li>
-                {accInfo ? <button className='logBtn' type='submit' onClick={onLogout}>Logout</button> : null}
+
+                  {accInfo ?
+                    <div className='dropBox'>
+                      <button className='logBtn' type='submit' onClick={onLogout}>Logout</button>
+                    </div>
+                    : null}
+
                 </div>
               </li>
-             
+
             </>
             :
             <>

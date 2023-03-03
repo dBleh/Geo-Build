@@ -22,13 +22,16 @@ function SavedBuilds() {
   }
   
   return (
+    <>
     
-      
         <div className='savedScenes'>
+        <h1>Saved Scene List</h1>
+        <br></br>
       {sceneTitles ? sceneTitles.map((title) => (
         <div onClick={() => onClick(title)} key={title}>{title}</div>
       )): null}
     </div>
+    </>
 
   );
 }

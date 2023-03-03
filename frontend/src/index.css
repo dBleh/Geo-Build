@@ -43,7 +43,7 @@ section li {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #8AAAE5;
+  background-color: #FFFFFF;
   width: 100vw;
   height: 100vh;
 }
@@ -51,7 +51,7 @@ section li {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #8AAAE5;
+  background-color: #FFFFFF;
   width: 100vw;
   height: 100vh;
 }
@@ -63,13 +63,6 @@ section li {
   padding: 0 20px;
   color: rgb(20, 18, 19);
   border-radius: 200px;
-}
-
-.logBtn {
-  background-color: #8AAAE5;
-  border: 1px solid #000000;
-  margin-top: 20px;
-
 }
 
 .activeLink {
@@ -124,8 +117,8 @@ header {
   text-align: center;
   top: 0;
   width: 100%;
-  height: 5.5vh;
-  background-color: #EA738DFF;
+  height: 5.8vh;
+  background-color: #8AAAE5;
   z-index: 1;
   color: rgb(45, 45, 45);
   font-family: sans-serif;
@@ -145,9 +138,10 @@ li {
 
 h1 {
   position: relative;
-  margin-top: 1px;
+  margin-top: -1px;
   font-size: 20px;
 }
+
 
 #popup {
   position: fixed;
@@ -163,7 +157,10 @@ h1 {
 }
 
 #saveScene {
+  position: absolute;
+ right:8vw;
   display: none;
+
 }
 
 #instructions {
@@ -182,10 +179,10 @@ h1 {
 .savedScenes {
   position: fixed;
   text-align: center;
-  height: 80px;
-  width: 200px;
-  top: 12%;
-  left: 6.5%;
+  height: 500px;
+  width: 500px;
+  top: 40vh;
+  left: 47vw;
   transform: translate(-50%, -50%);
   background-color: white;
   border: 1px solid black;
@@ -194,23 +191,46 @@ h1 {
 
 
 #dropdown {
+
   position: fixed;
   text-align: center;
-  height: 20px;
+  height: 100vh;
   width: 100px;
   top: 5%;
-  right: 100px;
+  right:0;
   padding: 10px;
+
+}
+
+.logBtn {
+  position: absolute;
+  display:flex;
+  text-align: center;
+  border: 1px solid #2d2d2d;
+
+ top: 9.2vh;
+ width: 75px;
+ background-color: #8AAAE5;
 
 }
 
 .accountDropDown {
   position: fixed;
-  right: 5px
+  right: 3.5vw;
 }
-
+.dropBox{
+  position: fixed;
+  border: 1px solid #2d2d2d;
+  border-top: none;
+  background-color: #8AAAE5;
+  right: 1.4vw;
+  top:5.8vh;
+  height: 100px;
+  width: 75px
+}
 #checkBox {
   position: fixed;
-  right: 70px;
+  font-size: 14px;
+  right:-1vw;
   width: 150px
 }
