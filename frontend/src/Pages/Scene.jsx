@@ -4,7 +4,7 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { DragControls } from 'three/examples/jsm/controls/DragControls';
 import { Vector3 } from 'three';
 import { getIntersectObj, setPosition } from '../SceneHelpers/inAnimation';
-import { objIns, addSnaps } from '../SceneHelpers/objectInstantiation';
+import { objIns, addSnaps, snapNew } from '../SceneHelpers/objectInstantiation';
 import SaveBuild from './saveScene';
 import { connect } from 'react-redux';
 class Scene extends React.Component {
@@ -342,10 +342,7 @@ class Scene extends React.Component {
     this.lastTime = this.time
     if (this.selectedObject) {
       
-      
 
-      
-      
       var v = this.camera.getWorldPosition(new THREE.Vector3())
       v = this.camera.getWorldPosition(new THREE.Vector3())
       v.addScaledVector(this.camera.getWorldDirection(new THREE.Vector3()), 13)
@@ -369,16 +366,9 @@ class Scene extends React.Component {
             if (this.selectedObject.objType === "floor" && this.objToSnap.objType === "wall") {
             }
             if (this.selectedObject.objType === "floorT" && this.objToSnap.objType === "wall") {
-            } if (this.selectedObject.objType === "roof" && (
-              this.objToSnap.objType === "floorLeft" ||
-              this.objToSnap.objType === "floorRight" ||
-              this.objToSnap.objType === "floorBack" ||
-              this.objToSnap.objType === "floorFront" ||
-              this.objToSnap.objType === "floorRightT" ||
-              this.objToSnap.objType === "floorBackT" ||
-              this.objToSnap.objType === "floorLeftT"
-            )) {
-              this.objToSnap = null
+            } 
+            if (this.selectedObject.objType === "roof" && this.objToSnap.objType === "floor" ) {
+          
             }
             else {
               const newPos = setPosition(intersectedObj, this.selectedObject, this.snapRadius, this.objs)
@@ -486,30 +476,6 @@ class Scene extends React.Component {
       objType: objType,
     }
     this.scene.add(obj);
-    if (this.selectedObject) {
-      const objGeometry = new THREE.BoxGeometry(1, 1, 1)
-      const material = new THREE.MeshBasicMaterial({ color: 0x000000})
-      
-      var edgesGeometry = new THREE.EdgesGeometry(this.selectedObject.obj.geometry);
-  
-      // Get an array of vertices from the edges geometry
-      var vertices = edgesGeometry.attributes.position.array;
-  
-      // Loop through the vertices array two at a time
-      for (var i = 0; i < vertices.length; i += 6) {
-        // Get the positions of the two vertices that make up the edge
-        var vertex1 = new THREE.Vector3(vertices[i], vertices[i + 1], vertices[i + 2]);
-        var vertex2 = new THREE.Vector3(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
-  
-        // Compute the midpoint of the two vertices
-        var midpoint = new THREE.Vector3().addVectors(vertex1, vertex2).multiplyScalar(0.5);
-        const obj = new THREE.Mesh(objGeometry, material);
-        obj.position.set(midpoint.x,midpoint.y+5,midpoint.z);
-        this.scene.add(obj)
-        
-        // Print the position of the midpoint
-      }
-    }
   }
 
   render() {

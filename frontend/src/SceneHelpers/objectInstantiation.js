@@ -154,7 +154,7 @@ export function objIns(vThree, objType) {
   }
 }
 
-export function addSnaps(selectedObject,isVisible) {
+export function addSnaps(selectedObject, isVisible) {
   var snapObjs = []
   const objGeometry = new THREE.BoxGeometry(1, 1, 1);
   const matT = new THREE.MeshBasicMaterial({ color: 0xf00fff });
@@ -188,7 +188,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
-      objType: 'floorLeft',
+      objType: 'floor',
+      side: 'left'
     });
     const snapObjRight = new THREE.Mesh(objGeometry, mat);
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
@@ -198,7 +199,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
-      objType: 'floorRight',
+      objType: 'floor',
+      side: 'right'
     });
     const snapObjBack = new THREE.Mesh(objGeometry, matT);
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
@@ -208,7 +210,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
-      objType: 'floorBack',
+      objType: 'floor',
+      side: 'back'
     });
     const snapObjFront = new THREE.Mesh(objGeometry, matT);
     snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
@@ -217,7 +220,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjFront.visible = isVisible
     snapObjs.push({
       obj: snapObjFront,
-      objType: 'floorFront',
+      objType: 'floor',
+      side: 'front'
     });
     return snapObjs
   }
@@ -250,7 +254,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
-      objType: 'roofLeft',
+      objType: 'roof',
+      side: 'left'
     });
     const snapObjRight = new THREE.Mesh(objGeometry, mat);
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
@@ -260,7 +265,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
-      objType: 'roofRight',
+      objType: 'roof',
+      side: 'right'
     });
     const snapObjBack = new THREE.Mesh(objGeometry, matT);
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
@@ -270,7 +276,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
-      objType: 'roofBack',
+      objType: 'roof',
+      side: 'back'
     });
     const snapObjFront = new THREE.Mesh(objGeometry, matT);
     snapObjFront.position.copy(selectedObject.obj.position).add(snapPositions.front);
@@ -279,13 +286,14 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjFront.visible = isVisible
     snapObjs.push({
       obj: snapObjFront,
-      objType: 'roofFront',
+      objType: 'roof',
+      side: 'front'
     });
     return snapObjs
   }
   if (selectedObject.objType === 'wall') {
     // Add snap point to wall object
-    const snapPos = new THREE.Vector3(0, 5, 0);
+    const snapPos = new THREE.Vector3(0, 5, -.1);
     const snapObj = new THREE.Mesh(objGeometry, mat);
     snapPos.applyQuaternion(selectedObject.obj.quaternion);
     snapObj.position.copy(selectedObject.obj.position).add(snapPos);
@@ -336,7 +344,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
-      objType: 'floorLeftT',
+      objType: 'floorT',
+      side: 'left'
     });
     const snapObjRight = new THREE.Mesh(objGeometry, mat);
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
@@ -350,7 +359,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
-      objType: 'floorRightT',
+      objType: 'floorT',
+      side: 'right'
     });
     const snapObjBack = new THREE.Mesh(squareGeometry, mat);
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
@@ -360,7 +370,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
-      objType: 'floorBackT',
+      objType: 'floorT',
+      side: 'back'
     });
     return snapObjs
   }
@@ -387,7 +398,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjLeft.visible = isVisible
     snapObjs.push({
       obj: snapObjLeft,
-      objType: 'roofLeftT',
+      objType: 'roofT',
+      side: 'left'
     });
     const snapObjRight = new THREE.Mesh(objGeometry, mat);
     snapObjRight.position.copy(selectedObject.obj.position).add(snapPositions.right);
@@ -401,7 +413,8 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjRight.visible = isVisible
     snapObjs.push({
       obj: snapObjRight,
-      objType: 'roofRightT',
+      objType: 'roofT',
+      side: 'right'
     });
     const snapObjBack = new THREE.Mesh(squareGeometry, mat);
     snapObjBack.position.copy(selectedObject.obj.position).add(snapPositions.back);
@@ -411,8 +424,10 @@ export function addSnaps(selectedObject,isVisible) {
     snapObjBack.visible = isVisible
     snapObjs.push({
       obj: snapObjBack,
-      objType: 'roofBackT',
+      objType: 'roofT',
+      side: 'back'
     });
     return snapObjs
   }
 }
+

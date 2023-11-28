@@ -19,7 +19,8 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "react-service-worker": "^0.1.1",
-    "react-toastify": "^8.1.1"
+    "react-toastify": "^8.1.1",
+    "three": "^0.158.0"
   },
   "scripts": {
     "start": "react-scripts start",

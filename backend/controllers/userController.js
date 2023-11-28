@@ -25,6 +25,7 @@ const sceneNames = asyncHandler(async (req, res) => {
 const saveScene = asyncHandler(async (req, res) => {
   const { userId, objs, sceneName } = req.body
   const scene = await sceneModel.findOne({ sceneName: sceneName, userId: userId });
+  console.log(sceneName)
   
   if(!scene){
     const newScene = await sceneModel.create({

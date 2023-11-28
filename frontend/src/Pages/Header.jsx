@@ -10,6 +10,8 @@ function Header() {
   const navigate = useNavigate()
   var [accInfo, setAccountInfo] = useState(false)
   const dispatch = useDispatch()
+  console.log(user)
+
   const onLogout = () => {
     dispatch(logout())
     navigate('/homepage')
@@ -28,7 +30,8 @@ function Header() {
               <li><Link to='/workspace' className="activeLink">Work Space</Link></li>
               <li>
                 <div className='accountDropDown' onClick={onClick}>
-                  <li>{(user.name[0]).toUpperCase()}</li>
+                  
+                  <li>{(user.name).toUpperCase()}</li>
 
                   {accInfo ?
                     <div className='dropBox'>

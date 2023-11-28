@@ -13,7 +13,7 @@ export function setPosition(objToSnap, selectedObject,snapRadius,objs) {
   var newPos = true
   var offset = 0;
   if (selectedObject.objType === 'wall') {
-    offset = selectedObject.obj.geometry.parameters.height / 2;
+    offset = selectedObject.obj.geometry.parameters.height / 2 + .5;
   }
   if (selectedObject.objType === 'floor') {
     offset = -2;
@@ -22,10 +22,10 @@ export function setPosition(objToSnap, selectedObject,snapRadius,objs) {
     offset = -4.5
   }
   if (selectedObject.objType === 'roof') {
-    offset = -.1
+    offset = .1
   }
   if (selectedObject.objType === 'roofT') {
-    offset = -.1
+    offset = 0
   }if (selectedObject.objType === 'door') {
     offset = 5
   }
@@ -36,18 +36,7 @@ export function setPosition(objToSnap, selectedObject,snapRadius,objs) {
   selectedObject.obj.position.copy(objToSnap.obj.position);
   selectedObject.obj.position.y += offset;
   if (selectedObject.objType === "floorT") {
-    if (objToSnap.objType === "floorBack") {
-      // Apply the snapped direction to the selected object's quaternion
-      const q = new THREE.Quaternion();
-      q.setFromUnitVectors(new THREE.Vector3(0, 0, -1), snappedDirection);
-      selectedObject.obj.quaternion.copy(q);
-      // Move the selected object slightly away from the snapped object in the opposite direction of the snapped direction
-      const direction = snappedDirection.clone().multiplyScalar(0);
-      selectedObject.obj.rotation.y -= Math.PI / 2
-      selectedObject.obj.rotation.y -= Math.PI
-      selectedObject.obj.position.add(direction);
-    }
-    if (objToSnap.objType === "floorBackT") {
+    if (objToSnap.side === "back") {
       // Apply the snapped direction to the selected object's quaternion
       const q = new THREE.Quaternion();
       q.setFromUnitVectors(new THREE.Vector3(0, 0, -1), snappedDirection);
@@ -78,6 +67,7 @@ export function setPosition(objToSnap, selectedObject,snapRadius,objs) {
       selectedObject.obj.position.add(direction);
   }
   if (selectedObject.objType === "wall") {
+    
     // Apply the snapped direction to the selected object's quaternion
     const q = new THREE.Quaternion();
     q.setFromUnitVectors(new THREE.Vector3(0, 0, -1), snappedDirection);
@@ -85,8 +75,15 @@ export function setPosition(objToSnap, selectedObject,snapRadius,objs) {
     // Move the selected object slightly away from the snapped object in the opposite direction of the snapped direction
     const direction = snappedDirection.clone().multiplyScalar(-.1);
     selectedObject.obj.position.add(direction);
+    if(objToSnap.objType === "roof" || objToSnap.objType === "roofT" ) {
+      selectedObject.obj.position.y -= 1
+    }
+    if( objToSnap.objType === "wall" ){
+      selectedObject.obj.position.y -= .5
+    }
   }
   if(selectedObject.objType === 'roof'){
+  
     const object1Position = objToSnap.obj.position.clone();
     const object1Orientation = new THREE.Vector3(0, 0, 1); 
     const object2WorldPosition = new THREE.Vector3();
@@ -101,24 +98,29 @@ export function setPosition(objToSnap, selectedObject,snapRadius,objs) {
     // Move the selected object slightly away from the snapped object in the opposite direction of the snapped direction
     var direction = 0
     if (dotProduct < 0) {
-       direction = snappedDirection.clone().multiplyScalar(4.9);
+       direction = snappedDirection.clone().multiplyScalar(4.8);
     } else{
-       direction = snappedDirection.clone().multiplyScalar(-4.9);
+       direction = snappedDirection.clone().multiplyScalar(-5);
     } 
    
-    selectedObject.obj.position.add(direction);
+    if(objToSnap.objType === 'roof'){
+      direction.multiplyScalar(1.0419)
+      selectedObject.obj.position.add(direction);
+      selectedObject.obj.position.y -= .1
+    }
+    else{
+      selectedObject.obj.position.add(direction);
+    }
   }
   if (selectedObject.objType === "roofT") {
     
       // Apply the snapped direction to the selected object's quaternion
       const q = new THREE.Quaternion();
       q.setFromUnitVectors(new THREE.Vector3(0, 0, -1), snappedDirection);
-      
       selectedObject.obj.quaternion.copy(q);
       // Move the selected object slightly away from the snapped object in the opposite direction of the snapped direction
-      const direction = snappedDirection.clone().multiplyScalar(0);
+      const direction = snappedDirection.clone().multiplyScalar(-.1);
       selectedObject.obj.rotateY(-Math.PI / 2)
-      selectedObject.obj.rotateY(-Math.PI)
       selectedObject.obj.position.add(direction);
       const object1Position = objToSnap.obj.position.clone();
       const object1Orientation = new THREE.Vector3(1, 0, 0); 

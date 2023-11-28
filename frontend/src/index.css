@@ -47,13 +47,14 @@ section li {
   width: 100vw;
   height: 100vh;
 }
-.homePage{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #FFFFFF;
-  width: 100vw;
-  height: 100vh;
+
+#homePage {
+  position: fixed;
+  font-size: 14px;
+  top: 40vh;
+  left: 30vw;
+
+  height: 200px;
 }
 
 .heading {
@@ -158,7 +159,7 @@ h1 {
 
 #saveScene {
   position: absolute;
- right:8vw;
+  right: 8vw;
   display: none;
 
 }
@@ -197,20 +198,20 @@ h1 {
   height: 100vh;
   width: 100px;
   top: 5%;
-  right:0;
+  right: 0;
   padding: 10px;
 
 }
 
 .logBtn {
   position: absolute;
-  display:flex;
+  display: flex;
   text-align: center;
   border: 1px solid #2d2d2d;
-
- top: 9.2vh;
- width: 75px;
- background-color: #8AAAE5;
+  right: -.5px;
+  top: 9.2vh;
+  width: 77px;
+  background-color: #8AAAE5;
 
 }
 
@@ -218,19 +219,21 @@ h1 {
   position: fixed;
   right: 3.5vw;
 }
-.dropBox{
+
+.dropBox {
   position: fixed;
   border: 1px solid #2d2d2d;
   border-top: none;
   background-color: #8AAAE5;
   right: 1.4vw;
-  top:5.8vh;
+  top: 5.8vh;
   height: 100px;
   width: 75px
 }
+
 #checkBox {
   position: fixed;
   font-size: 14px;
-  right:-1vw;
+  right: -1vw;
   width: 150px
 }
